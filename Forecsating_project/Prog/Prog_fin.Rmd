@@ -1,0 +1,419 @@
+---
+title: "Untitled"
+output: html_document
+date: '2022-05-01'
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+#Load every library needed
+```{r, echo = FALSE, message = FALSE}
+source(here::here("Setup/setup.R"))
+```
+#Load the dataset
+```{r}
+setwd(here::here("Data/")) # Where are the data sets
+load("Bikesharing_dataset.RData")
+```
+#Building the dataset for every station needed and converting it as a dataframe + renameing the needed columns
+```{r}
+Gland_Les_Tuillières <- as.data.frame(series["Gland, Les Tuillières"])
+colnames(Gland_Les_Tuillières) <- c("Bike","E_Bike","Capacity","Date","Name")
+
+Gland_Swissquote <- as.data.frame(series["Gland, Swissquote"])
+colnames(Gland_Swissquote) <- c("Bike","E_Bike","Capacity","Date","Name")
+
+Gland_Gare_Sud1 <- as.data.frame(series["Gland, Gare Sud, travaux, déplacée de 20m en mars-avril"])
+colnames(Gland_Gare_Sud1) <- c("Bike","E_Bike","Capacity","Date","Name")
+
+Gland_Gare_Sud2 <-  as.data.frame(series["Gland, Gare Sud, travaux, déplacée de 40m a nord en mars-avril"])
+colnames(Gland_Gare_Sud2) <- c("Bike","E_Bike","Capacity","Date","Name")
+
+Gland_UICN <- as.data.frame(series["Gland, UICN"])
+colnames(Gland_UICN) <- c("Bike","E_Bike","Capacity","Date","Name")
+
+Gland_Montoly <- as.data.frame(series["Gland, Montoly"])
+colnames(Gland_Montoly) <- c("Bike","E_Bike","Capacity","Date","Name")
+
+Gland_Grand_Rue <- as.data.frame(series["Gland, Grand'Rue"])
+colnames(Gland_Grand_Rue) <- c("Bike","E_Bike","Capacity","Date","Name")
+
+Gland_La_Falaise <- as.data.frame(series["Gland, La Falaise"])
+colnames(Gland_La_Falaise) <- c("Bike","E_Bike","Capacity","Date","Name")
+
+Gland_La_Lignière <- as.data.frame(series["Gland, La Lignière"])
+colnames(Gland_La_Lignière) <- c("Bike","E_Bike","Capacity","Date","Name")
+
+Gland_Eikenott <- as.data.frame(series["Gland, Eikenott"])
+colnames(Gland_Eikenott) <- c("Bike","E_Bike","Capacity","Date","Name")
+
+Gland_La_Dôle <- as.data.frame(series["Gland, La Dôle"])
+colnames(Gland_La_Dôle) <- c("Bike","E_Bike","Capacity","Date","Name")
+
+Gland_En_Bord <- as.data.frame(series["Gland, En Bord"])
+colnames(Gland_En_Bord) <- c("Bike","E_Bike","Capacity","Date","Name")
+
+```
+
+
+#searching for NA values
+```{r}
+which(is.na(Gland_Les_Tuillières))
+which(is.na(Gland_Swissquote))
+which(is.na(Gland_Gare_Sud1))
+which(is.na(Gland_Gare_Sud2))
+which(is.na(Gland_UICN))
+which(is.na(Gland_Montoly))
+which(is.na(Gland_Grand_Rue))
+which(is.na(Gland_La_Falaise))
+which(is.na(Gland_La_Lignière))
+which(is.na(Gland_Eikenott))
+which(is.na(Gland_La_Dôle))
+which(is.na(Gland_En_Bord))
+```
+#Look at the 2 dataset with NA values (both grare sud)
+#Gland Gare is composed by 2 dataset with null data because of works changement -> eliminate the null data and bind in a unique dataset 
+```{r}
+Gland_Gare_Sud1 <- Gland_Gare_Sud1[c(1:256), ]
+
+Gland_Gare_Sud2 <- Gland_Gare_Sud2[c(257:1975), ]
+
+Gland_Gare_Sud <- bind_rows(Gland_Gare_Sud1, Gland_Gare_Sud2)
+Gland_Gare_Sud
+```
+
+# the first 117 rows are 1 per our and not every 10 minuts -> eliminate
+```{r}
+Gland_Eikenott <- Gland_Eikenott[c(118:1975), ]
+Gland_En_Bord <- Gland_En_Bord[c(118:1975), ]
+Gland_Gare_Sud <- Gland_Gare_Sud[c(118:1975), ]
+Gland_Grand_Rue <- Gland_Grand_Rue[c(118:1975), ]
+Gland_La_Dôle <- Gland_La_Dôle[c(118:1975), ]
+Gland_La_Falaise <- Gland_La_Falaise[c(118:1975), ]
+Gland_Les_Tuillières <- Gland_Les_Tuillières[c(118:1975), ]
+Gland_Montoly <- Gland_Montoly[c(118:1975), ]
+Gland_Swissquote <- Gland_Swissquote[c(118:1975), ]
+Gland_UICN <- Gland_UICN[c(118:1975), ]
+Gland_La_Lignière <- Gland_La_Lignière[c(118:1975), ]
+```
+#first look at the data. we are interested in forecasting the numbers of bike and ebike needed in the different stations, so here we plot the number of this 2 variables and the stations capacities sorted by time.
+```{r}
+
+ggplot()+
+  geom_line(data = Gland_Les_Tuillières, aes(y=Bike, x=Date, color = "Bike"), size=1) +
+  geom_line(data = Gland_Les_Tuillières, aes(y=E_Bike, x=Date, Color = "E_bike"), size=1) +
+  geom_line(data = Gland_Les_Tuillières, aes(y=Capacity, x=Date, color = "Capacity"), size=1) +
+  scale_color_manual(values = c("Bike"="blue","E_bike"="black","Capacity"="red")) +
+  labs(color = "Legend") +
+  ggtitle("Gland_Les_Tuillières")
+
+ggplot()+
+  geom_line(data = Gland_Swissquote, aes(y=Bike, x=Date, color = "Bike"), size=1) +
+  geom_line(data = Gland_Swissquote, aes(y=E_Bike, x=Date, Color = "E_bike"), size=1) +
+  geom_line(data = Gland_Swissquote, aes(y=Capacity, x=Date, color = "Capacity"), size=1) +
+  scale_color_manual(values = c("Bike"="blue","E_bike"="black","Capacity"="red")) +
+  labs(color = "Legend") +
+  ggtitle("Gland_Swissquote")
+
+ggplot()+
+  geom_line(data = Gland_Gare_Sud, aes(y=Bike, x=Date, color = "Bike"), size=1) +
+  geom_line(data = Gland_Gare_Sud, aes(y=E_Bike, x=Date, Color = "E_bike"), size=1) +
+  geom_line(data = Gland_Gare_Sud, aes(y=Capacity, x=Date, color = "Capacity"), size=1) +
+  scale_color_manual(values = c("Bike"="blue","E_bike"="black","Capacity"="red")) +
+  labs(color = "Legend") +
+  ggtitle("Gland_Gare_Sud")
+
+ggplot()+
+  geom_line(data = Gland_UICN, aes(y=Bike, x=Date, color = "Bike"), size=1) +
+  geom_line(data = Gland_UICN, aes(y=E_Bike, x=Date, Color = "E_bike"), size=1) +
+  geom_line(data = Gland_UICN, aes(y=Capacity, x=Date, color = "Capacity"), size=1) +
+  scale_color_manual(values = c("Bike"="blue","E_bike"="black","Capacity"="red")) +
+  labs(color = "Legend") +
+  ggtitle("Gland_UICN")
+
+ggplot()+
+  geom_line(data = Gland_Montoly, aes(y=Bike, x=Date, color = "Bike"), size=1) +
+  geom_line(data = Gland_Montoly, aes(y=E_Bike, x=Date, Color = "E_bike"), size=1) +
+  geom_line(data = Gland_Montoly, aes(y=Capacity, x=Date, color = "Capacity"), size=1) +
+  scale_color_manual(values = c("Bike"="blue","E_bike"="black","Capacity"="red")) +
+  labs(color = "Legend") +
+  ggtitle("Gland_Montoly")
+
+ggplot()+
+  geom_line(data = Gland_Grand_Rue, aes(y=Bike, x=Date, color = "Bike"), size=1) +
+  geom_line(data = Gland_Grand_Rue, aes(y=E_Bike, x=Date, Color = "E_bike"), size=1) +
+  geom_line(data = Gland_Grand_Rue, aes(y=Capacity, x=Date, color = "Capacity"), size=1) +
+  scale_color_manual(values = c("Bike"="blue","E_bike"="black","Capacity"="red")) +
+  labs(color = "Legend") +
+  ggtitle("Gland_Grand_Rue")
+
+ggplot()+
+  geom_line(data = Gland_La_Falaise, aes(y=Bike, x=Date, color = "Bike"), size=1) +
+  geom_line(data = Gland_La_Falaise, aes(y=E_Bike, x=Date, Color = "E_bike"), size=1) +
+  geom_line(data = Gland_La_Falaise, aes(y=Capacity, x=Date, color = "Capacity"), size=1) +
+  scale_color_manual(values = c("Bike"="blue","E_bike"="black","Capacity"="red")) +
+  labs(color = "Legend") +
+  ggtitle("Gland_La_Falaise")
+
+ggplot()+
+  geom_line(data = Gland_La_Lignière, aes(y=Bike, x=Date, color = "Bike"), size=1) +
+  geom_line(data = Gland_La_Lignière, aes(y=E_Bike, x=Date, Color = "E_bike"), size=1) +
+  geom_line(data = Gland_La_Lignière, aes(y=Capacity, x=Date, color = "Capacity"), size=1) +
+  scale_color_manual(values = c("Bike"="blue","E_bike"="black","Capacity"="red")) +
+  labs(color = "Legend") +
+  ggtitle("Gland_La_Lignière")
+
+ggplot()+
+  geom_line(data = Gland_Eikenott, aes(y=Bike, x=Date, color = "Bike"), size=1) +
+  geom_line(data = Gland_Eikenott, aes(y=E_Bike, x=Date, Color = "E_bike"), size=1) +
+  geom_line(data = Gland_Eikenott, aes(y=Capacity, x=Date, color = "Capacity"), size=1) +
+  scale_color_manual(values = c("Bike"="blue","E_bike"="black","Capacity"="red")) +
+  labs(color = "Legend") +
+  ggtitle("Gland_Eikenott")
+
+ggplot()+
+  geom_line(data = Gland_La_Dôle, aes(y=Bike, x=Date, color = "Bike"), size=1) +
+  geom_line(data = Gland_La_Dôle, aes(y=E_Bike, x=Date, Color = "E_bike"), size=1) +
+  geom_line(data = Gland_La_Dôle, aes(y=Capacity, x=Date, color = "Capacity"), size=1) +
+  scale_color_manual(values = c("Bike"="blue","E_bike"="black","Capacity"="red")) +
+  labs(color = "Legend") +
+  ggtitle("Gland_La_Dôle")
+
+ggplot()+
+  geom_line(data = Gland_En_Bord, aes(y=Bike, x=Date, color = "Bike"), size=1) +
+  geom_line(data = Gland_En_Bord, aes(y=E_Bike, x=Date, Color = "E_bike"), size=1) +
+  geom_line(data = Gland_En_Bord, aes(y=Capacity, x=Date, color = "Capacity"), size=1) +
+  scale_color_manual(values = c("Bike"="blue","E_bike"="black","Capacity"="red")) +
+  labs(color = "Legend") +
+  ggtitle("Gland_En_Bord")
+
+```
+
+
+
+#We select just the bike and the date data for the interested point, we convert everything into tsibble data, and we set date column as index. Doing so, now we have a time series for the bike data at the interested point and it will be easier to build models and to use the autoplot function. After that we will repeat the process for the ebike data, and after this we will do it for the next point.
+
+## Gland Les Tuillières
+```{r}
+#Bike data 
+Gland_Les_Tuillières_Bike_tsibble <- as_tsibble(Gland_Les_Tuillières%>%
+  dplyr::select(Date, "Bike"= Bike), index = Date)
+
+#Ebike data
+Gland_Les_Tuillières_E_Bike_tsibble <- as_tsibble(Gland_Les_Tuillières%>%
+  dplyr::select(Date, "E_Bike"= E_Bike), index = Date)
+
+#autoplot
+autoplot(Gland_Les_Tuillières_Bike_tsibble)
+autoplot(Gland_Les_Tuillières_E_Bike_tsibble)
+```
+
+## Gland Swissquote
+```{r}
+#Bike data 
+Gland_Swissquote_Bike_tsibble <- as_tsibble(Gland_Swissquote%>%
+  dplyr::select(Date, "Bike"= Bike), index = Date)
+
+#Ebike data
+Gland_Swissquote_E_Bike_tsibble <- as_tsibble(Gland_Swissquote%>%
+  dplyr::select(Date, "E_Bike"= E_Bike), index = Date)
+
+#autoplot
+autoplot(Gland_Swissquote_Bike_tsibble)
+autoplot(Gland_Swissquote_E_Bike_tsibble)
+```
+
+## Gland Gare Sud
+```{r}
+#Bike data 
+Gland_Gare_Sud_Bike_tsibble <- as_tsibble(Gland_Gare_Sud%>%
+  dplyr::select(Date, "Bike"= Bike), index = Date)
+
+#Ebike data
+Gland_Gare_Sud_E_Bike_tsibble <- as_tsibble(Gland_Gare_Sud%>%
+  dplyr::select(Date, "E_Bike"= E_Bike), index = Date)
+
+#autoplot
+autoplot(Gland_Gare_Sud_Bike_tsibble)
+autoplot(Gland_Gare_Sud_E_Bike_tsibble)
+```
+
+## Gland UICN
+```{r}
+#Bike data 
+Gland_UICN_Bike_tsibble <- as_tsibble(Gland_UICN%>%
+  dplyr::select(Date, "Bike"= Bike), index = Date)
+
+#Ebike data
+Gland_UICN_E_Bike_tsibble <- as_tsibble(Gland_UICN%>%
+  dplyr::select(Date, "E_Bike"= E_Bike), index = Date)
+
+#autoplot
+autoplot(Gland_UICN_Bike_tsibble)
+autoplot(Gland_UICN_E_Bike_tsibble)
+```
+
+## Gland Montoly
+```{r}
+#Bike data 
+Gland_Montoly_Bike_tsibble <- as_tsibble(Gland_Montoly%>%
+  dplyr::select(Date, "Bike"= Bike), index = Date)
+
+#Ebike data
+Gland_Montoly_E_Bike_tsibble <- as_tsibble(Gland_Montoly%>%
+  dplyr::select(Date, "E_Bike"= E_Bike), index = Date)
+
+#autoplot
+autoplot(Gland_Montoly_Bike_tsibble)
+autoplot(Gland_Montoly_E_Bike_tsibble)
+```
+
+## Gland Grand'Rue
+```{r}
+#Bike data 
+Gland_Grand_Rue_Bike_tsibble <- as_tsibble(Gland_Grand_Rue%>%
+  dplyr::select(Date, "Bike"= Bike), index = Date)
+
+#Ebike data
+Gland_Grand_Rue_E_Bike_tsibble <- as_tsibble(Gland_Grand_Rue%>%
+  dplyr::select(Date, "E_Bike"= E_Bike), index = Date)
+
+#autoplot
+autoplot(Gland_Grand_Rue_Bike_tsibble)
+autoplot(Gland_Grand_Rue_E_Bike_tsibble)
+```
+
+## Gland La Falaise
+```{r}
+#Bike data 
+Gland_La_Falaise_Bike_tsibble <- as_tsibble(Gland_La_Falaise%>%
+  dplyr::select(Date, "Bike"= Bike), index = Date)
+
+#Ebike data
+Gland_La_Falaise_E_Bike_tsibble <- as_tsibble(Gland_La_Falaise%>%
+  dplyr::select(Date, "E_Bike"= E_Bike), index = Date)
+
+#autoplot
+autoplot(Gland_La_Falaise_Bike_tsibble)
+autoplot(Gland_La_Falaise_E_Bike_tsibble)
+```
+
+## Gland La Liginière
+```{r}
+#Bike data 
+Gland_La_Lignière_Bike_tsibble <- as_tsibble(Gland_La_Lignière%>%
+  dplyr::select(Date, "Bike"= Bike), index = Date)
+
+#Ebike data
+Gland_La_Lignière_E_Bike_tsibble <- as_tsibble(Gland_La_Lignière%>%
+  dplyr::select(Date, "E_Bike"= E_Bike), index = Date)
+
+#autoplot
+autoplot(Gland_La_Lignière_Bike_tsibble)
+autoplot(Gland_La_Lignière_E_Bike_tsibble)
+```
+
+## Gland Eiekenott
+```{r}
+#Bike data 
+Gland_Eikenott_Bike_tsibble <- as_tsibble(Gland_Eikenott%>%
+  dplyr::select(Date, "Bike"= Bike), index = Date)
+
+#Ebike data
+Gland_Eikenott_E_Bike_tsibble <- as_tsibble(Gland_Eikenott%>%
+  dplyr::select(Date, "E_Bike"= E_Bike), index = Date)
+
+#autoplot
+autoplot(Gland_Eikenott_Bike_tsibble)
+autoplot(Gland_Eikenott_E_Bike_tsibble)
+```
+
+## Gland La Dôle
+```{r}
+#Bike data 
+Gland_La_Dôle_Bike_tsibble <- as_tsibble(Gland_La_Dôle%>%
+  dplyr::select(Date, "Bike"= Bike), index = Date)
+
+#Ebike data
+Gland_La_Dôle_E_Bike_tsibble <- as_tsibble(Gland_La_Dôle%>%
+  dplyr::select(Date, "E_Bike"= E_Bike), index = Date)
+
+#autoplot
+autoplot(Gland_La_Dôle_Bike_tsibble)
+autoplot(Gland_La_Dôle_E_Bike_tsibble)
+```
+
+## Gland En Bord
+```{r}
+#Bike data 
+Gland_En_Bord_Bike_tsibble <- as_tsibble(Gland_En_Bord%>%
+  dplyr::select(Date, "Bike"= Bike), index = Date)
+
+#Ebike data
+Gland_En_Bord_E_Bike_tsibble <- as_tsibble(Gland_En_Bord%>%
+  dplyr::select(Date, "E_Bike"= E_Bike), index = Date)
+
+#autoplot
+autoplot(Gland_En_Bord_Bike_tsibble)
+autoplot(Gland_En_Bord_E_Bike_tsibble)
+```
+
+
+
+# exemple of model taken by proff class
+```{r}
+'fit <- Gland_Les_Tuillières_Bike_ts %>%
+model(ETS(Bike ~ error("A") + trend("N", alpha = 0.1) + season("N")))
+fit %>% forecast(h = 10) %>% autoplot(Gland_Les_Tuillières_Bike_ts, level = 0) +
+theme(legend.position = "none")'
+```
+### Another possibility 
+
+```{r}
+Gland_tot <- bind_cols(Gland_Eikenott, Gland_En_Bord, Gland_Gare_Sud, Gland_Grand_Rue, Gland_La_Dôle, Gland_La_Falaise, Gland_La_Lignière, Gland_Les_Tuillières, Gland_Montoly, Gland_Swissquote, Gland_UICN)
+Gland_tot_clean <- Gland_tot[-c(9,14,19,24,29,34,39,44,49,54)]
+
+names(Gland_tot_clean)
+head(Gland_tot_clean)
+```
+
+
+#dropping columns with station names and renaming columns
+```{r}
+Gland_fin <- Gland_tot_clean[-c(5,9,13,17,21,25,29,33,37,41,45)]
+colnames(Gland_fin) <- c("Bike_Eikenott", "Ebike_Eikenott", "Capacity_Eikenott", "Date", "Bike_En_Bord", "Ebike_En_Bord", "Capacity_En_Bord", "Bike_Gare_Sud", "Ebike_Gare_Sud", "Capacity_Gare_Sud", "Bike_Grand_Rue", "Ebike_Grand_Rue", "Capacity_Grand_Rue", "Bike_La_Dôle", "Ebike_La_Dôle", "Capacity_La_Dôle", "Bike_La_Falaise", "Ebike_La_Falaise", "Capacity_La_Falaise", "Bike_La_Lignière", "Ebike_La_Lignière", "Capacity_La_Lignière", "Bike_Les_Tuillières", "Ebike_Les_Tuillières", "Capacity_Les_Tuillières", "Bike_Montoly", "Ebike_Montoly", "Capacity_Montoly", "Bike_Swissquote", "Ebike_Swissquote", "Capacity_Swissquote", "Bike_UICN", "Ebike_UICN", "Capacity_UICN")
+head(Gland_fin)
+```
+
+#convert into tsibble data
+```{r}
+Gland_fin_tsibble <- as_tsibble(Gland_fin, index = Date)
+Gland_fin_tsibble
+```
+
+```{r}
+Gland_fin_tsibble %>% autoplot(Bike_Eikenott) +
+  ylab("Bike") +
+  xlab("Time") +
+  ggtitle("Eikenott")
+```
+
+
+## NOW WE CAN DO IT FOR EVERY VARIABLE BUT FOR THE MOMENT WE WILL FOCUS ON JUST THIS ONE
+## Smoothed average model first idea
+
+```{r}
+Eikenott_bike_ts_plus <- Gland_Eikenott_Bike_tsibble %>%
+  mutate("MA" = slider::slide_dbl(Bike, mean, .before = 3, .after = 3, .complete = TRUE))
+
+Eikenott_bike_ts_plus$Bike <- as.double(Eikenott_bike_ts_plus$Bike)
+
+Eikenott_bike_ts_plus
+
+Eikenott_bike_ts_plus %>%
+  autoplot(Bike) +
+  ylab("Bike") + xlab("Time") +ggtitle("Eikenott") + autolayer(Eikenott_bike_ts_plus, MA, color = "red")
+
+```
