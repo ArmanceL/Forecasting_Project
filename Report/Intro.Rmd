@@ -34,6 +34,9 @@ Introduction
 Part 1 : Data preparation
 Part 2 : Exploratory Data Analysis (EDA)
 Part 3 : Analysis
+(a) Aggregation choice for hierarchical time series 
+(b) Model building
+(c) Model selection
 Conclusion 
 
 ## Related work
