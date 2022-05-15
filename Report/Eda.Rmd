@@ -9,7 +9,10 @@ date: '2022-05-15'
 source(here::here("Setup/setup.R"))
 ```
 
-#first look at the data. we are interested in forecasting the numbers of bike and ebike needed in the different stations, so here we plot the number of this 2 variables and the stations capacities sorted by time.
+### Part 2 : Exploratory Data Analysis (EDA)
+
+
+We first look at the data. we are interested in forecasting the numbers of bike and ebike needed in the different stations, so here we plot the number of this 2 variables and the stations capacities sorted by time.
 ```{r}
 
 ggplot()+
@@ -101,3 +104,17 @@ ggplot()+
   ggtitle("Gland_En_Bord")
 
 ```
+
+1. Gland_Les_Tuillières : No clear trend or seasonality 
+2. Gland_Swissquote : No clear trend or seasonality 
+3. Gland_Gare_Sud : No clear trend or seasonality 
+4. Gland_UICN : Some movement and maybe a little bit of seasonality --> Try a decomposition + ETS model (mean/naive/Snaive)
+5. Gland_Montoly : No clear trend or seasonality 
+6. Gland_Grande_Rue : Some movement and maybe a little bit of seasonality --> Try a decomposition + ETS model (mean/naive/Snaive)
+7. Gland_La_Falaise : No clear trend or seasonality 
+8. Gland_La_Lignère : No clear trend or seasonality 
+9. Gland_Eikenott : Some movement in the trend and maybe a little bit of seasonality
+10. Gland_La_Dôle : No clear trend or seasonality 
+11. Gland_En_Bord : Almost zero pattern (no movement of the line)
+In all the station the capacity is far away from beiing reach. 
+
