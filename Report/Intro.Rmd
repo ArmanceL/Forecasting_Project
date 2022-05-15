@@ -8,3 +8,33 @@ date: '2022-05-15'
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
+#### Forecasting II
+#### Project 1 : Bikesharing - GLAND
+
+Armance Larfeuille, Katia Voltz, Ezechiele Beghetto and Nina Bidet
+
+Teacher : V. Chavez and M. Aigner
+Spring Semester 20222
+
+### Introduction
+
+We are doing this report as part of our "Forecasting II" course in which we have to produce a detailed report based on a large Swiss bike-sharing company data set over several weeks in the spring of 2022. The number of available bikes and their charge level (for e-bikes) are gathered at 10-minute intervals over 634 stations across Switzerland. Our team focused on the stations in the city of Gland.
+
+## Project objectives
+
+We will use the forecasting techniques and models learned during the semester in order to forecast the number of bikes available at a given station and produce a 90% upperbound. 
+The objectif is then to provide the forecasts for every 10 minutes of Wednesday, May 25th.
+
+- Data Bike : *Bikesharing_dataset.Rdata*
+- Data IDAWEB meteo : *order_103137_data.csv*
+
+## Structure of the report
+
+Introduction
+Part 1 : Data preparation
+Part 2 : Exploratory Data Analysis (EDA)
+Part 3 : Analysis
+Conclusion 
+
+## Related work
+- Forecasting I course and exercises 
