@@ -309,7 +309,29 @@ Gland_La_Lignière_E_Bike_tsibble <- as_tsibble(Gland_La_Lignière%>%
 autoplot(Gland_La_Lignière_Bike_tsibble)
 autoplot(Gland_La_Lignière_E_Bike_tsibble)
 ```
+We do an STL decomposition to see if we could identify any trend or seasonality dor this station.
+```{r}
+#Bike data 
+Gland_La_Lignière_Bike_tsibble <- Gland_La_Lignière_Bike_tsibble %>% fill_gaps(Bike=0,.full = TRUE)
+dcmp <- Gland_La_Lignière_Bike_tsibble %>% model(STL(Bike))
+components(dcmp) %>% autoplot() + xlab("Year")
 
+fit <- Gland_La_Lignière_Bike_tsibble %>%
+model(ETS(Bike ~ error("A") + trend("N", alpha = 0.8) + season("A")))
+fit %>% forecast(h = 36) %>% autoplot(Gland_La_Lignière_Bike_tsibble, level = 0) +
+theme(legend.position = "none")
+
+#EBike data 
+
+Gland_La_Lignière_E_Bike_tsibble <- Gland_La_Lignière_E_Bike_tsibble %>% fill_gaps(E_Bike=0,.full = TRUE)
+dcmp <- Gland_La_Lignière_E_Bike_tsibble %>% model(STL(E_Bike))
+components(dcmp) %>% autoplot() + xlab("Year")
+
+fit <- Gland_La_Lignière_E_Bike_tsibble %>%
+model(ETS(E_Bike ~ error("A") + trend("N", alpha = 0.6) + season("A")))
+fit %>% forecast(h = 36) %>% autoplot(Gland_La_Lignière_E_Bike_tsibble, level = 0) +
+theme(legend.position = "none")
+```
 # 9. Gland Eiekenott
 ```{r}
 #Bike data 
