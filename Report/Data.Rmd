@@ -4,15 +4,16 @@ output: html_document
 date: '2022-05-15'
 ---
 
-
-#Load every library needed
 ```{r, echo = FALSE, message = FALSE}
 source(here::here("Setup/setup.R"))
 ```
+
+### Part 1 : Data preparation 
+
 #Load the dataset
 ```{r}
 setwd(here::here("Data/")) # Where are the data sets
-load("Bikesharing_dataset.RData")
+load("~/Desktop/Forecasting/Forecasting II/Project 1/Forecasting_Project-main/Bikesharing_dataset.RData")
 ```
 
 #Building the dataset for every station needed and converting it as a dataframe + renameing the needed columns
@@ -55,9 +56,6 @@ colnames(Gland_En_Bord) <- c("Bike","E_Bike","Capacity","Date","Name")
 
 ```
 
-
-
-
 #searching for NA values
 ```{r}
 which(is.na(Gland_Les_Tuillières))
@@ -73,8 +71,9 @@ which(is.na(Gland_Eikenott))
 which(is.na(Gland_La_Dôle))
 which(is.na(Gland_En_Bord))
 ```
+
 #Look at the 2 dataset with NA values (both grare sud)
-#Gland Gare is composed by 2 dataset with null data because of works changement -> eliminate the null data and bind in a unique dataset 
+Gland Gare is composed by 2 dataset with null data because of works changement -> eliminate the null data and bind in a unique dataset 
 ```{r}
 Gland_Gare_Sud1 <- Gland_Gare_Sud1[c(1:256), ]
 
@@ -84,8 +83,7 @@ Gland_Gare_Sud <- bind_rows(Gland_Gare_Sud1, Gland_Gare_Sud2)
 Gland_Gare_Sud
 ```
 
-
-# the first 117 rows are 1 per our and not every 10 minuts -> eliminate
+The first 117 rows are 1 per our and not every 10 minuts. So we eliminate them.
 ```{r}
 Gland_Eikenott <- Gland_Eikenott[c(118:1975), ]
 Gland_En_Bord <- Gland_En_Bord[c(118:1975), ]
@@ -99,3 +97,20 @@ Gland_Swissquote <- Gland_Swissquote[c(118:1975), ]
 Gland_UICN <- Gland_UICN[c(118:1975), ]
 Gland_La_Lignière <- Gland_La_Lignière[c(118:1975), ]
 ```
+
+The city of Gland has 11 stations and each of them has either classic bikes or electric bikes (e-bike). This includes 1858 observations and 2 variables for each station and each type of bike.
+**Stations**:
+1. Gland_Les_Tuillières 
+2. Gland_Swissquote 
+3. Gland_Gare_Sud
+4. Gland_UICN 
+5. Gland_Montoly 
+6. Gland_Grande_Rue 
+7. Gland_La_Falaise 
+8. Gland_La_Lignère 
+9. Gland_Eikenott 
+10. Gland_La_Dôle 
+11. Gland_En_Bord 
+**Variables**
+1. Date : *date* Borrowing date of the bike
+2. Bike : *num* Number of the borrowed bike 
