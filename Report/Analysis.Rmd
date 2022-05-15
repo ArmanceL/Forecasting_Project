@@ -4,14 +4,15 @@ output: html_document
 date: '2022-05-15'
 ---
 
-
-#Load every library needed
 ```{r, echo = FALSE, message = FALSE}
 source(here::here("Setup/setup.R"))
 ```
-#We select just the bike and the date data for the interested point, we convert everything into tsibble data, and we set date column as index. Doing so, now we have a time series for the bike data at the interested point and it will be easier to build models and to use the autoplot function. After that we will repeat the process for the ebike data, and after this we will do it for the next point.
 
-## Gland Les Tuillières
+### Part 3 : Analysis 
+
+We select just the bike and the date data for the interested point, we convert everything into tsibble data, and we set date column as index. Doing so, now we have a time series for the bike data at the interested point and it will be easier to build models and to use the autoplot function. After that we will repeat the process for the ebike data, and after this we will do it for the next point.
+
+# 1. Gland Les Tuillières
 ```{r}
 #Bike data 
 Gland_Les_Tuillières_Bike_tsibble <- as_tsibble(Gland_Les_Tuillières%>%
@@ -26,7 +27,7 @@ autoplot(Gland_Les_Tuillières_Bike_tsibble)
 autoplot(Gland_Les_Tuillières_E_Bike_tsibble)
 ```
 
-## Gland Swissquote
+# 2. Gland Swissquote
 ```{r}
 #Bike data 
 Gland_Swissquote_Bike_tsibble <- as_tsibble(Gland_Swissquote%>%
@@ -41,7 +42,7 @@ autoplot(Gland_Swissquote_Bike_tsibble)
 autoplot(Gland_Swissquote_E_Bike_tsibble)
 ```
 
-## Gland Gare Sud
+# 3. Gland Gare Sud
 ```{r}
 #Bike data 
 Gland_Gare_Sud_Bike_tsibble <- as_tsibble(Gland_Gare_Sud%>%
@@ -56,7 +57,7 @@ autoplot(Gland_Gare_Sud_Bike_tsibble)
 autoplot(Gland_Gare_Sud_E_Bike_tsibble)
 ```
 
-## Gland UICN
+# 4. Gland UICN
 ```{r}
 #Bike data 
 Gland_UICN_Bike_tsibble <- as_tsibble(Gland_UICN%>%
@@ -101,7 +102,7 @@ model(ETS(E_Bike ~ error("A") + trend("N", alpha = 0.5) + season("A")))
 fit %>% forecast(h = 36) %>% autoplot(Gland_UICN_E_Bike_tsibble, level = 0) +
 theme(legend.position = "none")
 ```
-## Gland Montoly
+# 5. Gland Montoly
 ```{r}
 #Bike data 
 Gland_Montoly_Bike_tsibble <- as_tsibble(Gland_Montoly%>%
@@ -144,8 +145,7 @@ geom_line(aes(y = .fitted, colour = "Fitted"), data = augment(fit)) +
 ylab("Gland_Montoly_E_Bike") + xlab("DATE")
 ```
 
-
-## Gland Grand'Rue
+# 6. Gland Grande Rue
 ```{r}
 #Bike data 
 Gland_Grand_Rue_Bike_tsibble <- as_tsibble(Gland_Grand_Rue%>%
@@ -185,7 +185,7 @@ theme(legend.position = "none")
 ```
 
 
-## Gland La Falaise
+# 7. Gland La Falaise
 ```{r}
 #Bike data 
 Gland_La_Falaise_Bike_tsibble <- as_tsibble(Gland_La_Falaise%>%
@@ -200,7 +200,7 @@ autoplot(Gland_La_Falaise_Bike_tsibble)
 autoplot(Gland_La_Falaise_E_Bike_tsibble)
 ```
 
-## Gland La Liginière
+# 8. Gland La Liginière
 ```{r}
 #Bike data 
 Gland_La_Lignière_Bike_tsibble <- as_tsibble(Gland_La_Lignière%>%
@@ -215,7 +215,7 @@ autoplot(Gland_La_Lignière_Bike_tsibble)
 autoplot(Gland_La_Lignière_E_Bike_tsibble)
 ```
 
-## Gland Eiekenott
+# 9. Gland Eiekenott
 ```{r}
 #Bike data 
 Gland_Eikenott_Bike_tsibble <- as_tsibble(Gland_Eikenott%>%
@@ -230,7 +230,7 @@ autoplot(Gland_Eikenott_Bike_tsibble)
 autoplot(Gland_Eikenott_E_Bike_tsibble)
 ```
 
-## Gland La Dôle
+# 10. Gland La Dôle
 ```{r}
 #Bike data 
 Gland_La_Dôle_Bike_tsibble <- as_tsibble(Gland_La_Dôle%>%
@@ -245,7 +245,7 @@ autoplot(Gland_La_Dôle_Bike_tsibble)
 autoplot(Gland_La_Dôle_E_Bike_tsibble)
 ```
 
-## Gland En Bord
+# 11. Gland En Bord
 ```{r}
 #Bike data 
 Gland_En_Bord_Bike_tsibble <- as_tsibble(Gland_En_Bord%>%
