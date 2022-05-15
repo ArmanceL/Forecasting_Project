@@ -1,0 +1,103 @@
+---
+title: "Eda"
+output: html_document
+date: '2022-05-15'
+---
+
+#Load every library needed
+```{r, echo = FALSE, message = FALSE}
+source(here::here("Setup/setup.R"))
+```
+
+#first look at the data. we are interested in forecasting the numbers of bike and ebike needed in the different stations, so here we plot the number of this 2 variables and the stations capacities sorted by time.
+```{r}
+
+ggplot()+
+  geom_line(data = Gland_Les_Tuillières, aes(y=Bike, x=Date, color = "Bike"), size=1) +
+  geom_line(data = Gland_Les_Tuillières, aes(y=E_Bike, x=Date, Color = "E_bike"), size=1) +
+  geom_line(data = Gland_Les_Tuillières, aes(y=Capacity, x=Date, color = "Capacity"), size=1) +
+  scale_color_manual(values = c("Bike"="blue","E_bike"="black","Capacity"="red")) +
+  labs(color = "Legend") +
+  ggtitle("Gland_Les_Tuillières")
+
+ggplot()+
+  geom_line(data = Gland_Swissquote, aes(y=Bike, x=Date, color = "Bike"), size=1) +
+  geom_line(data = Gland_Swissquote, aes(y=E_Bike, x=Date, Color = "E_bike"), size=1) +
+  geom_line(data = Gland_Swissquote, aes(y=Capacity, x=Date, color = "Capacity"), size=1) +
+  scale_color_manual(values = c("Bike"="blue","E_bike"="black","Capacity"="red")) +
+  labs(color = "Legend") +
+  ggtitle("Gland_Swissquote")
+
+ggplot()+
+  geom_line(data = Gland_Gare_Sud, aes(y=Bike, x=Date, color = "Bike"), size=1) +
+  geom_line(data = Gland_Gare_Sud, aes(y=E_Bike, x=Date, Color = "E_bike"), size=1) +
+  geom_line(data = Gland_Gare_Sud, aes(y=Capacity, x=Date, color = "Capacity"), size=1) +
+  scale_color_manual(values = c("Bike"="blue","E_bike"="black","Capacity"="red")) +
+  labs(color = "Legend") +
+  ggtitle("Gland_Gare_Sud")
+
+ggplot()+
+  geom_line(data = Gland_UICN, aes(y=Bike, x=Date, color = "Bike"), size=1) +
+  geom_line(data = Gland_UICN, aes(y=E_Bike, x=Date, Color = "E_bike"), size=1) +
+  geom_line(data = Gland_UICN, aes(y=Capacity, x=Date, color = "Capacity"), size=1) +
+  scale_color_manual(values = c("Bike"="blue","E_bike"="black","Capacity"="red")) +
+  labs(color = "Legend") +
+  ggtitle("Gland_UICN")
+
+ggplot()+
+  geom_line(data = Gland_Montoly, aes(y=Bike, x=Date, color = "Bike"), size=1) +
+  geom_line(data = Gland_Montoly, aes(y=E_Bike, x=Date, Color = "E_bike"), size=1) +
+  geom_line(data = Gland_Montoly, aes(y=Capacity, x=Date, color = "Capacity"), size=1) +
+  scale_color_manual(values = c("Bike"="blue","E_bike"="black","Capacity"="red")) +
+  labs(color = "Legend") +
+  ggtitle("Gland_Montoly")
+
+ggplot()+
+  geom_line(data = Gland_Grand_Rue, aes(y=Bike, x=Date, color = "Bike"), size=1) +
+  geom_line(data = Gland_Grand_Rue, aes(y=E_Bike, x=Date, Color = "E_bike"), size=1) +
+  geom_line(data = Gland_Grand_Rue, aes(y=Capacity, x=Date, color = "Capacity"), size=1) +
+  scale_color_manual(values = c("Bike"="blue","E_bike"="black","Capacity"="red")) +
+  labs(color = "Legend") +
+  ggtitle("Gland_Grand_Rue")
+
+ggplot()+
+  geom_line(data = Gland_La_Falaise, aes(y=Bike, x=Date, color = "Bike"), size=1) +
+  geom_line(data = Gland_La_Falaise, aes(y=E_Bike, x=Date, Color = "E_bike"), size=1) +
+  geom_line(data = Gland_La_Falaise, aes(y=Capacity, x=Date, color = "Capacity"), size=1) +
+  scale_color_manual(values = c("Bike"="blue","E_bike"="black","Capacity"="red")) +
+  labs(color = "Legend") +
+  ggtitle("Gland_La_Falaise")
+
+ggplot()+
+  geom_line(data = Gland_La_Lignière, aes(y=Bike, x=Date, color = "Bike"), size=1) +
+  geom_line(data = Gland_La_Lignière, aes(y=E_Bike, x=Date, Color = "E_bike"), size=1) +
+  geom_line(data = Gland_La_Lignière, aes(y=Capacity, x=Date, color = "Capacity"), size=1) +
+  scale_color_manual(values = c("Bike"="blue","E_bike"="black","Capacity"="red")) +
+  labs(color = "Legend") +
+  ggtitle("Gland_La_Lignière")
+
+ggplot()+
+  geom_line(data = Gland_Eikenott, aes(y=Bike, x=Date, color = "Bike"), size=1) +
+  geom_line(data = Gland_Eikenott, aes(y=E_Bike, x=Date, Color = "E_bike"), size=1) +
+  geom_line(data = Gland_Eikenott, aes(y=Capacity, x=Date, color = "Capacity"), size=1) +
+  scale_color_manual(values = c("Bike"="blue","E_bike"="black","Capacity"="red")) +
+  labs(color = "Legend") +
+  ggtitle("Gland_Eikenott")
+
+ggplot()+
+  geom_line(data = Gland_La_Dôle, aes(y=Bike, x=Date, color = "Bike"), size=1) +
+  geom_line(data = Gland_La_Dôle, aes(y=E_Bike, x=Date, Color = "E_bike"), size=1) +
+  geom_line(data = Gland_La_Dôle, aes(y=Capacity, x=Date, color = "Capacity"), size=1) +
+  scale_color_manual(values = c("Bike"="blue","E_bike"="black","Capacity"="red")) +
+  labs(color = "Legend") +
+  ggtitle("Gland_La_Dôle")
+
+ggplot()+
+  geom_line(data = Gland_En_Bord, aes(y=Bike, x=Date, color = "Bike"), size=1) +
+  geom_line(data = Gland_En_Bord, aes(y=E_Bike, x=Date, Color = "E_bike"), size=1) +
+  geom_line(data = Gland_En_Bord, aes(y=Capacity, x=Date, color = "Capacity"), size=1) +
+  scale_color_manual(values = c("Bike"="blue","E_bike"="black","Capacity"="red")) +
+  labs(color = "Legend") +
+  ggtitle("Gland_En_Bord")
+
+```

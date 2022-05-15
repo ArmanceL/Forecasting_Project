@@ -1,0 +1,261 @@
+---
+title: "Analysis"
+output: html_document
+date: '2022-05-15'
+---
+
+
+#Load every library needed
+```{r, echo = FALSE, message = FALSE}
+source(here::here("Setup/setup.R"))
+```
+#We select just the bike and the date data for the interested point, we convert everything into tsibble data, and we set date column as index. Doing so, now we have a time series for the bike data at the interested point and it will be easier to build models and to use the autoplot function. After that we will repeat the process for the ebike data, and after this we will do it for the next point.
+
+## Gland Les Tuillières
+```{r}
+#Bike data 
+Gland_Les_Tuillières_Bike_tsibble <- as_tsibble(Gland_Les_Tuillières%>%
+  dplyr::select(Date, "Bike"= Bike), index = Date)
+
+#Ebike data
+Gland_Les_Tuillières_E_Bike_tsibble <- as_tsibble(Gland_Les_Tuillières%>%
+  dplyr::select(Date, "E_Bike"= E_Bike), index = Date)
+
+#autoplot
+autoplot(Gland_Les_Tuillières_Bike_tsibble)
+autoplot(Gland_Les_Tuillières_E_Bike_tsibble)
+```
+
+## Gland Swissquote
+```{r}
+#Bike data 
+Gland_Swissquote_Bike_tsibble <- as_tsibble(Gland_Swissquote%>%
+  dplyr::select(Date, "Bike"= Bike), index = Date)
+
+#Ebike data
+Gland_Swissquote_E_Bike_tsibble <- as_tsibble(Gland_Swissquote%>%
+  dplyr::select(Date, "E_Bike"= E_Bike), index = Date)
+
+#autoplot
+autoplot(Gland_Swissquote_Bike_tsibble)
+autoplot(Gland_Swissquote_E_Bike_tsibble)
+```
+
+## Gland Gare Sud
+```{r}
+#Bike data 
+Gland_Gare_Sud_Bike_tsibble <- as_tsibble(Gland_Gare_Sud%>%
+  dplyr::select(Date, "Bike"= Bike), index = Date)
+
+#Ebike data
+Gland_Gare_Sud_E_Bike_tsibble <- as_tsibble(Gland_Gare_Sud%>%
+  dplyr::select(Date, "E_Bike"= E_Bike), index = Date)
+
+#autoplot
+autoplot(Gland_Gare_Sud_Bike_tsibble)
+autoplot(Gland_Gare_Sud_E_Bike_tsibble)
+```
+
+## Gland UICN
+```{r}
+#Bike data 
+Gland_UICN_Bike_tsibble <- as_tsibble(Gland_UICN%>%
+  dplyr::select(Date, "Bike"= Bike), index = Date)
+
+#Ebike data
+Gland_UICN_E_Bike_tsibble <- as_tsibble(Gland_UICN%>%
+  dplyr::select(Date, "E_Bike"= E_Bike), index = Date)
+
+#autoplot
+autoplot(Gland_UICN_Bike_tsibble)
+autoplot(Gland_UICN_E_Bike_tsibble)
+```
+
+```{r}
+#Bike data forecast
+Gland_UICN_Bike_tsibble <- Gland_UICN_Bike_tsibble %>% fill_gaps(Bike=0,.full = TRUE) #utiliser Bike=na.locf 
+
+#Gland_UICN_Bike_tsibble%>%gg_season(y=Bike)
+#decompo STL pas possible 
+
+
+mean_model <- Gland_UICN_Bike_tsibble %>% model( Mean = MEAN(Bike),
+Naive = NAIVE(Bike),
+S_Naive = SNAIVE(Bike))
+
+forecast_mean_model <- mean_model %>% forecast(h = 36) 
+forecast_mean_model %>% autoplot(Gland_UICN_Bike_tsibble, level = NULL) + guides(colour=guide_legend(title = "Forecast"))
+
+#mean_model %>% accuracy
+#beef.fit.NAIVE %>% accuracy()
+#beef.fit.SNAIVE %>% accuracy()
+
+#EBike data forecast
+Gland_UICN_E_Bike_tsibble <- Gland_UICN_E_Bike_tsibble %>% fill_gaps(E_Bike=0,.full = TRUE) #na.locf marche pas 
+
+dcmp <- Gland_UICN_E_Bike_tsibble %>% model(STL(E_Bike))
+components(dcmp) %>% autoplot() + xlab("Year")
+
+fit <- Gland_UICN_E_Bike_tsibble %>%
+model(ETS(E_Bike ~ error("A") + trend("N", alpha = 0.5) + season("A")))
+fit %>% forecast(h = 36) %>% autoplot(Gland_UICN_E_Bike_tsibble, level = 0) +
+theme(legend.position = "none")
+```
+## Gland Montoly
+```{r}
+#Bike data 
+Gland_Montoly_Bike_tsibble <- as_tsibble(Gland_Montoly%>%
+  dplyr::select(Date, "Bike"= Bike), index = Date)
+
+#Ebike data
+Gland_Montoly_E_Bike_tsibble <- as_tsibble(Gland_Montoly%>%
+  dplyr::select(Date, "E_Bike"= E_Bike), index = Date)
+
+#autoplot
+autoplot(Gland_Montoly_Bike_tsibble)
+autoplot(Gland_Montoly_E_Bike_tsibble)
+```
+
+```{r}
+#Bike data forecast
+Gland_Montoly_Bike_tsibble <- Gland_Montoly_Bike_tsibble %>% fill_gaps(Bike=0,.full = TRUE) #utiliser Bike=na.locf 
+
+dcmp <- Gland_Montoly_Bike_tsibble %>% model(STL(Bike))
+components(dcmp) %>% autoplot() + xlab("Year")
+
+fit <- Gland_Montoly_Bike_tsibble %>%
+model(ETS(Bike ~ error("A") + trend("N", alpha = 0.1) + season("N")))
+fit %>% forecast(h = 36) %>% autoplot(Gland_Montoly_Bike_tsibble, level = 0) +
+theme(legend.position = "none")
+
+#EBike data forecast
+Gland_Montoly_E_Bike_tsibble <- Gland_Montoly_E_Bike_tsibble %>% fill_gaps(E_Bike=0,.full = TRUE) #na.locf marche pas 
+
+dcmp <- Gland_Montoly_E_Bike_tsibble %>% model(STL(E_Bike))
+components(dcmp) %>% autoplot() + xlab("Year")
+
+fit <- Gland_Montoly_E_Bike_tsibble %>%
+model(ETS(E_Bike ~ error("A") + trend("N", alpha = 0.2) + season("N")))
+fit %>% forecast(h = 36) %>% autoplot(Gland_Montoly_E_Bike_tsibble, level = 0) +
+theme(legend.position = "none")
+
+fit %>% forecast(h = 24) %>% autoplot(Gland_Montoly_E_Bike_tsibble) +
+geom_line(aes(y = .fitted, colour = "Fitted"), data = augment(fit)) +
+ylab("Gland_Montoly_E_Bike") + xlab("DATE")
+```
+
+
+## Gland Grand'Rue
+```{r}
+#Bike data 
+Gland_Grand_Rue_Bike_tsibble <- as_tsibble(Gland_Grand_Rue%>%
+  dplyr::select(Date, "Bike"= Bike), index = Date)
+
+#Ebike data
+Gland_Grand_Rue_E_Bike_tsibble <- as_tsibble(Gland_Grand_Rue%>%
+  dplyr::select(Date, "E_Bike"= E_Bike), index = Date)
+
+#autoplot
+autoplot(Gland_Grand_Rue_Bike_tsibble)
+autoplot(Gland_Grand_Rue_E_Bike_tsibble)
+```
+
+```{r}
+#Bike data forecast
+Gland_Grand_Rue_Bike_tsibble <- Gland_Grand_Rue_Bike_tsibble %>% fill_gaps(Bike=0,.full = TRUE) #utiliser Bike=na.locf 
+
+dcmp <- Gland_Grand_Rue_Bike_tsibble %>% model(STL(Bike))
+components(dcmp) %>% autoplot() + xlab("Year")
+
+fit <- Gland_Grand_Rue_Bike_tsibble %>%
+model(ETS(Bike ~ error("A") + trend("N", alpha = 0.1) + season("A")))
+fit %>% forecast(h = 24) %>% autoplot(Gland_Grand_Rue_Bike_tsibble, level = 0) +
+theme(legend.position = "none")
+
+#EBike data forecast
+Gland_Grand_Rue_E_Bike_tsibble <- Gland_Grand_Rue_E_Bike_tsibble %>% fill_gaps(E_Bike=0,.full = TRUE) #na.locf marche pas 
+
+dcmp <- Gland_Grand_Rue_E_Bike_tsibble %>% model(STL(E_Bike))
+components(dcmp) %>% autoplot() + xlab("Year")
+
+fit <- Gland_Grand_Rue_E_Bike_tsibble %>%
+model(ETS(E_Bike ~ error("A") + trend("N", alpha = 0.1) + season("A")))
+fit %>% forecast(h = 24) %>% autoplot(Gland_Grand_Rue_E_Bike_tsibble, level = 0) +
+theme(legend.position = "none")
+```
+
+
+## Gland La Falaise
+```{r}
+#Bike data 
+Gland_La_Falaise_Bike_tsibble <- as_tsibble(Gland_La_Falaise%>%
+  dplyr::select(Date, "Bike"= Bike), index = Date)
+
+#Ebike data
+Gland_La_Falaise_E_Bike_tsibble <- as_tsibble(Gland_La_Falaise%>%
+  dplyr::select(Date, "E_Bike"= E_Bike), index = Date)
+
+#autoplot
+autoplot(Gland_La_Falaise_Bike_tsibble)
+autoplot(Gland_La_Falaise_E_Bike_tsibble)
+```
+
+## Gland La Liginière
+```{r}
+#Bike data 
+Gland_La_Lignière_Bike_tsibble <- as_tsibble(Gland_La_Lignière%>%
+  dplyr::select(Date, "Bike"= Bike), index = Date)
+
+#Ebike data
+Gland_La_Lignière_E_Bike_tsibble <- as_tsibble(Gland_La_Lignière%>%
+  dplyr::select(Date, "E_Bike"= E_Bike), index = Date)
+
+#autoplot
+autoplot(Gland_La_Lignière_Bike_tsibble)
+autoplot(Gland_La_Lignière_E_Bike_tsibble)
+```
+
+## Gland Eiekenott
+```{r}
+#Bike data 
+Gland_Eikenott_Bike_tsibble <- as_tsibble(Gland_Eikenott%>%
+  dplyr::select(Date, "Bike"= Bike), index = Date)
+
+#Ebike data
+Gland_Eikenott_E_Bike_tsibble <- as_tsibble(Gland_Eikenott%>%
+  dplyr::select(Date, "E_Bike"= E_Bike), index = Date)
+
+#autoplot
+autoplot(Gland_Eikenott_Bike_tsibble)
+autoplot(Gland_Eikenott_E_Bike_tsibble)
+```
+
+## Gland La Dôle
+```{r}
+#Bike data 
+Gland_La_Dôle_Bike_tsibble <- as_tsibble(Gland_La_Dôle%>%
+  dplyr::select(Date, "Bike"= Bike), index = Date)
+
+#Ebike data
+Gland_La_Dôle_E_Bike_tsibble <- as_tsibble(Gland_La_Dôle%>%
+  dplyr::select(Date, "E_Bike"= E_Bike), index = Date)
+
+#autoplot
+autoplot(Gland_La_Dôle_Bike_tsibble)
+autoplot(Gland_La_Dôle_E_Bike_tsibble)
+```
+
+## Gland En Bord
+```{r}
+#Bike data 
+Gland_En_Bord_Bike_tsibble <- as_tsibble(Gland_En_Bord%>%
+  dplyr::select(Date, "Bike"= Bike), index = Date)
+
+#Ebike data
+Gland_En_Bord_E_Bike_tsibble <- as_tsibble(Gland_En_Bord%>%
+  dplyr::select(Date, "E_Bike"= E_Bike), index = Date)
+
+#autoplot
+autoplot(Gland_En_Bord_Bike_tsibble)
+autoplot(Gland_En_Bord_E_Bike_tsibble)
+```

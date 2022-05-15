@@ -1,0 +1,101 @@
+---
+title: "Data"
+output: html_document
+date: '2022-05-15'
+---
+
+
+#Load every library needed
+```{r, echo = FALSE, message = FALSE}
+source(here::here("Setup/setup.R"))
+```
+#Load the dataset
+```{r}
+setwd(here::here("Data/")) # Where are the data sets
+load("Bikesharing_dataset.RData")
+```
+
+#Building the dataset for every station needed and converting it as a dataframe + renameing the needed columns
+```{r}
+Gland_Les_Tuillières <- as.data.frame(series["Gland, Les Tuillières"])
+colnames(Gland_Les_Tuillières) <- c("Bike","E_Bike","Capacity","Date","Name")
+
+Gland_Swissquote <- as.data.frame(series["Gland, Swissquote"])
+colnames(Gland_Swissquote) <- c("Bike","E_Bike","Capacity","Date","Name")
+
+Gland_Gare_Sud1 <- as.data.frame(series["Gland, Gare Sud, travaux, déplacée de 20m en mars-avril"])
+colnames(Gland_Gare_Sud1) <- c("Bike","E_Bike","Capacity","Date","Name")
+
+Gland_Gare_Sud2 <-  as.data.frame(series["Gland, Gare Sud, travaux, déplacée de 40m a nord en mars-avril"])
+colnames(Gland_Gare_Sud2) <- c("Bike","E_Bike","Capacity","Date","Name")
+
+Gland_UICN <- as.data.frame(series["Gland, UICN"])
+colnames(Gland_UICN) <- c("Bike","E_Bike","Capacity","Date","Name")
+
+Gland_Montoly <- as.data.frame(series["Gland, Montoly"])
+colnames(Gland_Montoly) <- c("Bike","E_Bike","Capacity","Date","Name")
+
+Gland_Grand_Rue <- as.data.frame(series["Gland, Grand'Rue"])
+colnames(Gland_Grand_Rue) <- c("Bike","E_Bike","Capacity","Date","Name")
+
+Gland_La_Falaise <- as.data.frame(series["Gland, La Falaise"])
+colnames(Gland_La_Falaise) <- c("Bike","E_Bike","Capacity","Date","Name")
+
+Gland_La_Lignière <- as.data.frame(series["Gland, La Lignière"])
+colnames(Gland_La_Lignière) <- c("Bike","E_Bike","Capacity","Date","Name")
+
+Gland_Eikenott <- as.data.frame(series["Gland, Eikenott"])
+colnames(Gland_Eikenott) <- c("Bike","E_Bike","Capacity","Date","Name")
+
+Gland_La_Dôle <- as.data.frame(series["Gland, La Dôle"])
+colnames(Gland_La_Dôle) <- c("Bike","E_Bike","Capacity","Date","Name")
+
+Gland_En_Bord <- as.data.frame(series["Gland, En Bord"])
+colnames(Gland_En_Bord) <- c("Bike","E_Bike","Capacity","Date","Name")
+
+```
+
+
+
+
+#searching for NA values
+```{r}
+which(is.na(Gland_Les_Tuillières))
+which(is.na(Gland_Swissquote))
+which(is.na(Gland_Gare_Sud1))
+which(is.na(Gland_Gare_Sud2))
+which(is.na(Gland_UICN))
+which(is.na(Gland_Montoly))
+which(is.na(Gland_Grand_Rue))
+which(is.na(Gland_La_Falaise))
+which(is.na(Gland_La_Lignière))
+which(is.na(Gland_Eikenott))
+which(is.na(Gland_La_Dôle))
+which(is.na(Gland_En_Bord))
+```
+#Look at the 2 dataset with NA values (both grare sud)
+#Gland Gare is composed by 2 dataset with null data because of works changement -> eliminate the null data and bind in a unique dataset 
+```{r}
+Gland_Gare_Sud1 <- Gland_Gare_Sud1[c(1:256), ]
+
+Gland_Gare_Sud2 <- Gland_Gare_Sud2[c(257:1975), ]
+
+Gland_Gare_Sud <- bind_rows(Gland_Gare_Sud1, Gland_Gare_Sud2)
+Gland_Gare_Sud
+```
+
+
+# the first 117 rows are 1 per our and not every 10 minuts -> eliminate
+```{r}
+Gland_Eikenott <- Gland_Eikenott[c(118:1975), ]
+Gland_En_Bord <- Gland_En_Bord[c(118:1975), ]
+Gland_Gare_Sud <- Gland_Gare_Sud[c(118:1975), ]
+Gland_Grand_Rue <- Gland_Grand_Rue[c(118:1975), ]
+Gland_La_Dôle <- Gland_La_Dôle[c(118:1975), ]
+Gland_La_Falaise <- Gland_La_Falaise[c(118:1975), ]
+Gland_Les_Tuillières <- Gland_Les_Tuillières[c(118:1975), ]
+Gland_Montoly <- Gland_Montoly[c(118:1975), ]
+Gland_Swissquote <- Gland_Swissquote[c(118:1975), ]
+Gland_UICN <- Gland_UICN[c(118:1975), ]
+Gland_La_Lignière <- Gland_La_Lignière[c(118:1975), ]
+```
