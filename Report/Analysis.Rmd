@@ -50,6 +50,34 @@ model(ETS(E_Bike ~ error("A") + trend("A", alpha = 0.5) + season("A")))
 fit %>% forecast(h = 36) %>% autoplot(Gland_Les_Tuillières_E_Bike_tsibble, level = 0) +
 theme(legend.position = "none")
 ```
+
+```{r}
+
+weather.tsibble <- as_tsibble(weather%>%
+  dplyr::select(Date, "precipitation"= precipitation), index = Date)
+weather.tsibble$precipitation = as.numeric(weather.tsibble$precipitation)
+weather.tsibble$Date = as.POSIXct(weather.tsibble$Date)
+
+ggplot(weather.tsibble, aes(x=Date)) + 
+  geom_line(aes(y = precipitation), color="steelblue")
+
+#Bike 
+Gland_Les_Tuillières_Bike_tsibble= Gland_Les_Tuillières_Bike_tsibble %>% inner_join(weather.tsibble,by="Date")
+
+
+ggplot(Gland_Les_Tuillières_Bike_tsibble, aes(x=Date)) + 
+  geom_line(aes(y = Bike), color = "darkred") + 
+  geom_line(aes(y = precipitation), color="steelblue")
+
+#EBike
+Gland_Les_Tuillières_E_Bike_tsibble= Gland_Les_Tuillières_E_Bike_tsibble %>% inner_join(weather.tsibble,by="Date")
+
+
+ggplot(Gland_Les_Tuillières_E_Bike_tsibble, aes(x=Date)) + 
+  geom_line(aes(y = E_Bike), color = "darkred") + 
+  geom_line(aes(y = precipitation), color="steelblue")
+
+```
 # 2. Gland Swissquote
 ```{r}
 #Bike data 
