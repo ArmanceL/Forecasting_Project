@@ -16,6 +16,42 @@ setwd(here::here("Data/")) # Where are the data sets
 load("~/Desktop/Forecasting/Forecasting II/Project 1/Forecasting_Project-main/Bikesharing_dataset.RData")
 ```
 
+weather <- read.csv2(here::here("Data/order_103137_data.csv"))
+
+#as.character(weather$time)
+weather$Year <- substr(weather$time, 1, 4)
+weather$Month <- substr(weather$time, 5, 6)
+weather$Day <- substr(weather$time, 7, 8)
+weather$Hour <- substr(weather$time, 9, 10)
+weather$Minute <- substr(weather$time, 11, 12)
+weather <- weather[-c(1:2)]
+weather <- rename(weather, precipitation = rre150z0)
+#weather$rre150z0 <- as.numeric(weather$rre150z0)
+#weather$Year <- as.numeric(weather$Year)
+#weather$Month <- as.numeric(weather$Month)
+#weather$Day <- as.numeric(weather$Day)
+#weather$Hour <- as.numeric(weather$Hour)
+#weather$Minute <- as.numeric(weather$Minute)
+
+library(dplyr)
+library(ggplot2)
+
+#install.packages("stringr")
+#weather$time = paste(weather$Year, weather$Month, weather$Day, sep = "-")
+#weather$time = paste(weather$time, weather$Hour, sep = " ")
+#weather$time = paste(weather$time, weather$Minute, sep = ":")
+
+weather$Date = str_c(weather$Year,"-",weather$Month,"-",weather$Day," ",weather$Hour,":",weather$Minute,":","00")
+
+weather$Date = as.POSIXlt(weather$Date, tz=" ")
+weather$Date = as.POSIXct(weather$Date)
+
+weather <- weather[weather$Date >= "2022-03-09 16:00:00" & weather$Date <= "2022-03-22 13:40:00
+",] # décalage horaire = mettre 1 h de plus 
+
+
+```
+
 #Building the dataset for every station needed and converting it as a dataframe + renameing the needed columns
 ```{r}
 Gland_Les_Tuillières <- as.data.frame(series["Gland, Les Tuillières"])
@@ -24,11 +60,8 @@ colnames(Gland_Les_Tuillières) <- c("Bike","E_Bike","Capacity","Date","Name")
 Gland_Swissquote <- as.data.frame(series["Gland, Swissquote"])
 colnames(Gland_Swissquote) <- c("Bike","E_Bike","Capacity","Date","Name")
 
-Gland_Gare_Sud1 <- as.data.frame(series["Gland, Gare Sud, travaux, déplacée de 20m en mars-avril"])
-colnames(Gland_Gare_Sud1) <- c("Bike","E_Bike","Capacity","Date","Name")
-
-Gland_Gare_Sud2 <-  as.data.frame(series["Gland, Gare Sud, travaux, déplacée de 40m a nord en mars-avril"])
-colnames(Gland_Gare_Sud2) <- c("Bike","E_Bike","Capacity","Date","Name")
+Gland_Gare_Sud <- as.data.frame(series["Gland, Gare Sud, travaux, déplacée de 20m en mars-avril"])
+colnames(Gland_Gare_Sud) <- c("Bike","E_Bike","Capacity","Date","Name")
 
 Gland_UICN <- as.data.frame(series["Gland, UICN"])
 colnames(Gland_UICN) <- c("Bike","E_Bike","Capacity","Date","Name")
@@ -85,17 +118,18 @@ Gland_Gare_Sud
 
 The first 117 rows are 1 per our and not every 10 minuts. So we eliminate them.
 ```{r}
-Gland_Eikenott <- Gland_Eikenott[c(118:1975), ]
-Gland_En_Bord <- Gland_En_Bord[c(118:1975), ]
-Gland_Gare_Sud <- Gland_Gare_Sud[c(118:1975), ]
-Gland_Grand_Rue <- Gland_Grand_Rue[c(118:1975), ]
-Gland_La_Dôle <- Gland_La_Dôle[c(118:1975), ]
-Gland_La_Falaise <- Gland_La_Falaise[c(118:1975), ]
-Gland_Les_Tuillières <- Gland_Les_Tuillières[c(118:1975), ]
-Gland_Montoly <- Gland_Montoly[c(118:1975), ]
-Gland_Swissquote <- Gland_Swissquote[c(118:1975), ]
-Gland_UICN <- Gland_UICN[c(118:1975), ]
-Gland_La_Lignière <- Gland_La_Lignière[c(118:1975), ]
+nobs <- nrow(Gland_Eikenott)
+Gland_Eikenott <- Gland_Eikenott[c(118:nobs), ]
+Gland_En_Bord <- Gland_En_Bord[c(118:nobs), ]
+Gland_Gare_Sud <- Gland_Gare_Sud[c(118:nobs), ]
+Gland_Grand_Rue <- Gland_Grand_Rue[c(118:nobs), ]
+Gland_La_Dôle <- Gland_La_Dôle[c(118:nobs), ]
+Gland_La_Falaise <- Gland_La_Falaise[c(118:nobs), ]
+Gland_Les_Tuillières <- Gland_Les_Tuillières[c(118:nobs), ]
+Gland_Montoly <- Gland_Montoly[c(118:nobs), ]
+Gland_Swissquote <- Gland_Swissquote[c(118:nobs), ]
+Gland_UICN <- Gland_UICN[c(118:nobs), ]
+Gland_La_Lignière <- Gland_La_Lignière[c(118:nobs), ]
 ```
 
 The city of Gland has 11 stations and each of them has either classic bikes or electric bikes (e-bike). This includes 1858 observations and 2 variables for each station and each type of bike.
