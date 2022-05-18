@@ -27,31 +27,55 @@ autoplot(Gland_Les_Tuillières_Bike_tsibble)
 autoplot(Gland_Les_Tuillières_E_Bike_tsibble)
 ```
 
-We do an STL decomposition to see if we could identify any trend or seasonality dor this station. 
+We do an STL decomposition for *Bikes* in the station "Les Tuillières", to see any seasonality or trend in the time series. We then apply an ETS forecast with no trend and an additive seasonality (multiplicative ? ). 
+
 ```{r}
-#Bike data 
+#ETS Decomposition Bike data 
 Gland_Les_Tuillières_Bike_tsibble <- Gland_Les_Tuillières_Bike_tsibble %>% fill_gaps(Bike=0,.full = TRUE)
 dcmp <- Gland_Les_Tuillières_Bike_tsibble %>% model(STL(Bike))
 components(dcmp) %>% autoplot() + xlab("Year")
 
+#ETS forecast
 fit <- Gland_Les_Tuillières_Bike_tsibble %>%
-model(ETS(Bike ~ error("A") + trend("N", alpha = 0.5) + season("A")))
-fit %>% forecast(h = 36) %>% autoplot(Gland_Les_Tuillières_Bike_tsibble, level = 0) +
+model(ETS(Bike ~ error("A") + trend("N", alpha = 0.5) + season("A"), opt_crit = "mse"))
+fit %>% forecast(h = 144) %>% autoplot(Gland_Les_Tuillières_Bike_tsibble, level = 0) +
 theme(legend.position = "none")
+```
+We now apply the Mean, the Naive and the S_Naive models. 
+```{r}
+mean_model <- Gland_Les_Tuillières_Bike_tsibble %>% model( Mean = MEAN(Bike),
+Naive = NAIVE(Bike),
+S_Naive = SNAIVE(Bike))
 
-#EBike data 
-
+forecast_mean_model <- mean_model %>% forecast(h = 144) 
+forecast_mean_model %>% autoplot(Gland_Les_Tuillières_Bike_tsibble, level = NULL) + guides(colour=guide_legend(title = "Forecast"))
+```
+We do the same for the *E_Bike* data, with an STL decomposition and an ETS forecast. 
+```{r}
+#ETS Decomposition Bike data 
 Gland_Les_Tuillières_E_Bike_tsibble <- Gland_Les_Tuillières_E_Bike_tsibble %>% fill_gaps(E_Bike=0,.full = TRUE)
 dcmp <- Gland_Les_Tuillières_E_Bike_tsibble %>% model(STL(E_Bike))
 components(dcmp) %>% autoplot() + xlab("Year")
 
+#ETS forecast
 fit <- Gland_Les_Tuillières_E_Bike_tsibble %>%
-model(ETS(E_Bike ~ error("A") + trend("A", alpha = 0.5) + season("A")))
-fit %>% forecast(h = 36) %>% autoplot(Gland_Les_Tuillières_E_Bike_tsibble, level = 0) +
+model(ETS(E_Bike ~ error("A") + trend("N", alpha = 0.5) + season("A")))
+fit %>% forecast(h = 144) %>% autoplot(Gland_Les_Tuillières_E_Bike_tsibble, level = 0) +
 theme(legend.position = "none")
 ```
-
+We also apply the Mean, the Naive and the S_Naive models. 
 ```{r}
+mean_model <- Gland_Les_Tuillières_E_Bike_tsibble %>% model( Mean = MEAN(E_Bike),
+Naive = NAIVE(E_Bike),
+S_Naive = SNAIVE(E_Bike))
+
+forecast_mean_model <- mean_model %>% forecast(h = 144) 
+forecast_mean_model %>% autoplot(Gland_Les_Tuillières_E_Bike_tsibble, level = NULL) + guides(colour=guide_legend(title = "Forecast"))
+```
+
+We had precipitations in Gland to the table of Bike and E_Bike in Les Tuillières. 
+```{r}
+#précipitations + bike 
 
 weather.tsibble <- as_tsibble(weather%>%
   dplyr::select(Date, "precipitation"= precipitation), index = Date)
@@ -78,6 +102,118 @@ ggplot(Gland_Les_Tuillières_E_Bike_tsibble, aes(x=Date)) +
   geom_line(aes(y = precipitation), color="steelblue")
 
 ```
+We also had temperatures in Gland in the tables. 
+```{r}
+#temperature + Les Tuillières 
+
+weather2.tsibble <- as_tsibble(weather2%>%
+  dplyr::select(Date, "temperature"= temperature), index = Date)
+weather2.tsibble$temperature = as.numeric(weather2.tsibble$temperature)
+weather2.tsibble$Date = as.POSIXct(weather2.tsibble$Date)
+
+ggplot(weather2.tsibble, aes(x=Date)) + 
+  geom_line(aes(y = temperature), color="steelblue")
+
+#Bike 
+Gland_Les_Tuillières_Bike_tsibble= Gland_Les_Tuillières_Bike_tsibble %>% inner_join(weather2.tsibble,by="Date")
+
+
+ggplot(Gland_Les_Tuillières_Bike_tsibble, aes(x=Date)) + 
+  geom_line(aes(y = Bike), color = "darkred") + 
+  geom_line(aes(y = temperature), color="steelblue")
+
+#EBike
+Gland_Les_Tuillières_E_Bike_tsibble= Gland_Les_Tuillières_E_Bike_tsibble %>% inner_join(weather2.tsibble,by="Date")
+
+
+ggplot(Gland_Les_Tuillières_E_Bike_tsibble, aes(x=Date)) + 
+  geom_line(aes(y = E_Bike), color = "darkred") + 
+  geom_line(aes(y = temperature), color="steelblue")
+
+```
+
+We now fit a multiple linear regression of Bikes with temperatures and precipitations. 
+```{r}
+fit.BikeTempPre <- Gland_Les_Tuillières_Bike_tsibble %>%
+model(tslm = TSLM(Bike ~ temperature + precipitation))
+report(fit.BikeTempPre)
+```
+The R squares is low but temperature and precipitation seems to be correlated. However it is not very logical that precipitation is positively correlated with the number of bikes borrowed in the station since the rain should normally not increase this number. 
+```{r}
+fit.EBikeTempPre <- Gland_Les_Tuillières_E_Bike_tsibble %>%
+model(tslm = TSLM(E_Bike ~ temperature + precipitation))
+report(fit.EBikeTempPre)
+```
+
+```{r}
+Gland_Les_Tuillières_E_Bike_tsibble %>% GGally::ggpairs(columns = 2:4)
+```
+Here, for E_Bikes the results seem more convincing since the precipitation is negatively correlated with the number of E_bikes borrowed. 
+```{r}
+#fit.EBikeTempPre %>% gg_tsresiduals() #NAs
+```
+Here is a forecast with TSLM() on EBike 
+```{r}
+fit.EBikeTempPre <- Gland_Les_Tuillières_E_Bike_tsibble %>% model(TSLM(E_Bike ~ trend() + season())) 
+fc.EBikeTempPre <- forecast(fit.EBikeTempPre, h=144)
+fc.EBikeTempPre %>% autoplot(Gland_Les_Tuillières_E_Bike_tsibble) + xlab("Date") + ylab("Bike")
+```
+
+ARIMA model 
+
+```{r}
+fit <- Gland_Les_Tuillières_Bike_tsibble %>%  model(ARIMA(Bike))
+report(fit)
+fit %>% forecast(h = 144) %>% autoplot(Gland_Les_Tuillières_Bike_tsibble)
+
+fit <- Gland_Les_Tuillières_E_Bike_tsibble %>%  model(ARIMA(E_Bike))
+report(fit)
+fit %>% forecast(h = 144) %>% autoplot(Gland_Les_Tuillières_E_Bike_tsibble)
+```
+
+Dynamic regression --> ne sort pas de forecast 
+
+```{r}
+Gland_Les_Tuillières_E_Bike_tsibble %>% gather("var", "value", E_Bike, temperature) %>%
+ggplot(aes(x = Date, y = value)) + geom_line() +
+facet_grid(vars(var), scales = "free_y") +
+labs(y = "", title = "Quarterly changes in US consumption and personal income")
+
+fit <- Gland_Les_Tuillières_E_Bike_tsibble %>% model(ARIMA(E_Bike ~ temperature))
+report(fit)
+
+bind_rows( 'Regression Errors' = as_tibble(residuals(fit, type = "regression")), 'ARIMA Errors' = as_tibble(residuals(fit, type = "innovation")), .id = "type") %>%
+ggplot(aes(x = Date, y = .resid)) + geom_line() + facet_grid(vars(type), scales = "free_y") + labs(y = "")
+
+fit %>% gg_tsresiduals()
+
+future_Gland_Les_Tuillières_E_Bike_tsibble <- new_data(Gland_Les_Tuillières_E_Bike_tsibble, 8) %>% mutate(temperature = mean(Gland_Les_Tuillières_E_Bike_tsibble$temperature)) 
+forecast(fit, new_data = future_Gland_Les_Tuillières_E_Bike_tsibble, h = 144) %>% autoplot(Gland_Les_Tuillières_E_Bike_tsibble) +
+labs(y = "Percentage change") 
+```
+
+Autre code pour dynamic regression mais ne marche pas
+```{r}
+fit <- auto.arima(Gland_Les_Tuillières_E_Bike_tsibble[,"E_Bike"], xreg=Gland_Les_Tuillières_E_Bike_tsibble[,"temperature"])
+
+checkresiduals(fit)
+
+fcast <- forecast(fit, xreg = rep(0.8,8))
+autoplot(fcast) + xlag("Date") + ylag("E_Bike")
+```
+
+VAR model 
+```{r}
+
+```
+
+GEM model 
+```{r}
+
+```
+
+
+
 # 2. Gland Swissquote
 ```{r}
 #Bike data 
