@@ -16,9 +16,9 @@ setwd(here::here("Data/")) # Where are the data sets
 load("~/Desktop/Forecasting/Forecasting II/Project 1/Forecasting_Project-main/Bikesharing_dataset.RData")
 ```
 
+Load precipitation dataset in Gland 
+```{r}
 weather <- read.csv2(here::here("Data/order_103137_data.csv"))
-
-#as.character(weather$time)
 weather$Year <- substr(weather$time, 1, 4)
 weather$Month <- substr(weather$time, 5, 6)
 weather$Day <- substr(weather$time, 7, 8)
@@ -36,21 +36,43 @@ weather <- rename(weather, precipitation = rre150z0)
 library(dplyr)
 library(ggplot2)
 
-#install.packages("stringr")
-#weather$time = paste(weather$Year, weather$Month, weather$Day, sep = "-")
-#weather$time = paste(weather$time, weather$Hour, sep = " ")
-#weather$time = paste(weather$time, weather$Minute, sep = ":")
 
 weather$Date = str_c(weather$Year,"-",weather$Month,"-",weather$Day," ",weather$Hour,":",weather$Minute,":","00")
 
 weather$Date = as.POSIXlt(weather$Date, tz=" ")
 weather$Date = as.POSIXct(weather$Date)
-
-weather <- weather[weather$Date >= "2022-03-09 16:00:00" & weather$Date <= "2022-03-22 13:40:00
-",] # décalage horaire = mettre 1 h de plus 
-
-
 ```
+
+Load temperature dataset 
+```{r}
+weather2 <- read.csv2(here::here("Data/temperatures_gland.csv"))
+
+weather2$Year <- substr(weather2$time, 1, 4)
+weather2$Month <- substr(weather2$time, 5, 6)
+weather2$Day <- substr(weather2$time, 7, 8)
+weather2$Hour <- substr(weather2$time, 9, 10)
+weather2$Minute <- substr(weather2$time, 11, 12)
+weather2 <- rename(weather2, temperature = tre200s0)
+
+#weather$rre150z0 <- as.numeric(weather$rre150z0)
+#weather$Year <- as.numeric(weather$Year)
+#weather$Month <- as.numeric(weather$Month)
+#weather$Day <- as.numeric(weather$Day)
+#weather$Hour <- as.numeric(weather$Hour)
+#weather$Minute <- as.numeric(weather$Minute)
+
+library(dplyr)
+library(ggplot2)
+
+weather2$Date = str_c(weather2$Year,"-",weather2$Month,"-",weather2$Day," ",weather2$Hour,":",weather2$Minute,":","00")
+
+weather2 <- weather2[-c(1:2,4:8)]
+weather2$Date = as.POSIXlt(weather2$Date, tz=" ")
+weather2$Date = as.POSIXct(weather2$Date)
+```
+
+
+
 
 #Building the dataset for every station needed and converting it as a dataframe + renameing the needed columns
 ```{r}
@@ -108,12 +130,12 @@ which(is.na(Gland_En_Bord))
 #Look at the 2 dataset with NA values (both grare sud)
 Gland Gare is composed by 2 dataset with null data because of works changement -> eliminate the null data and bind in a unique dataset 
 ```{r}
-Gland_Gare_Sud1 <- Gland_Gare_Sud1[c(1:256), ]
+#Gland_Gare_Sud1 <- Gland_Gare_Sud1[c(1:256), ]
 
-Gland_Gare_Sud2 <- Gland_Gare_Sud2[c(257:1975), ]
+#Gland_Gare_Sud2 <- Gland_Gare_Sud2[c(257:1975), ]
 
-Gland_Gare_Sud <- bind_rows(Gland_Gare_Sud1, Gland_Gare_Sud2)
-Gland_Gare_Sud
+#Gland_Gare_Sud <- bind_rows(Gland_Gare_Sud1, Gland_Gare_Sud2)
+#Gland_Gare_Sud
 ```
 
 The first 117 rows are 1 per our and not every 10 minuts. So we eliminate them.
