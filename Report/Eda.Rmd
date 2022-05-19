@@ -12,23 +12,62 @@ source(here::here("Setup/setup.R"))
 ### Part 2 : Exploratory Data Analysis (EDA)
 
 
-We first look at the data. we are interested in forecasting the numbers of bike and ebike needed in the different stations, so here we plot the number of this 2 variables and the stations capacities sorted by time.
+To plot different variable in the same grap thy need to be comparble
+```{r}
+#search for a max Bike and EBike value for every station
+max(Gland_fin[ , c(2,3,5,6,8,9,11,12,14,15,17,18,20,21,23,24,26,27,29,30,32,33)], na.rm = TRUE)
+#The max number of bycicle in a station is 12, so we will scale the weather variables from 0 to 12
+```
+
+Scaling process
+```{r}
+#internal variance
+diff_prec <- max(Gland_fin$prec, na.rm = TRUE) - min(Gland_fin$prec, na.rm = TRUE)
+diff_temp <- max(Gland_fin$temp, na.rm = TRUE) - min(Gland_fin$temp, na.rm = TRUE)
+diff_ensoll <- max(Gland_fin$ensoll, na.rm = TRUE) - min(Gland_fin$ensoll, na.rm = TRUE)
+diff_vent <- max(Gland_fin$vent, na.rm = TRUE) - min(Gland_fin$vent, na.rm = TRUE)
+diff_press <- max(Gland_fin$press, na.rm = TRUE) - min(Gland_fin$press, na.rm = TRUE)
+#minimum
+min_prec <- min(Gland_fin$prec, na.rm = TRUE)
+min_temp <- min(Gland_fin$temp, na.rm = TRUE)
+min_ensoll <- min(Gland_fin$ensoll, na.rm = TRUE)
+min_vent <- min(Gland_fin$vent, na.rm = TRUE)
+min_press <- min(Gland_fin$press, na.rm = TRUE)
+#final formula to obtain datas from 0 to 12
+Gland_fin$prec_comp <- (Gland_fin$prec - min_prec)*12/diff_prec
+Gland_fin$temp_comp <- (Gland_fin$temp - min_temp)*12/diff_temp
+Gland_fin$ensoll_comp <- (Gland_fin$ensoll - min_ensoll)*12/diff_ensoll
+Gland_fin$vent_comp <- (Gland_fin$vent - min_vent)*12/diff_vent
+Gland_fin$press_comp <- (Gland_fin$press - min_press)*12/diff_press
+```
+
+We first look at the data. We are interested in forecasting the numbers of bike and ebike needed in the different stations, so here we plot the number of this 2 variables and the stations capacities sorted by time.
 ```{r}
 
-ggplot()+
-  geom_line(data = Gland_Les_Tuillières, aes(y=Bike, x=Date, color = "Bike"), size=1) +
-  geom_line(data = Gland_Les_Tuillières, aes(y=E_Bike, x=Date, Color = "E_bike"), size=1) +
-  geom_line(data = Gland_Les_Tuillières, aes(y=Capacity, x=Date, color = "Capacity"), size=1) +
-  scale_color_manual(values = c("Bike"="blue","E_bike"="black","Capacity"="red")) +
-  labs(color = "Legend") +
-  ggtitle("Gland_Les_Tuillières")
+#plot weather data
+#ensoleillement has to be eliminate from the graphs --> every day from min to max --> impossible to see
+colors <- c("Precipitation" = "blue", "Temperature" = "red", "Vent" = "Green", "Pression" = "orange")
 
+ggplot(Gland_fin ,aes(x=Date))+
+  geom_line(aes(y=temp_comp, color="Temperature"))+
+  geom_line(aes(y=vent_comp, color="Vent"))+
+  geom_line(aes(y=press_comp, color="Pression"))+
+  geom_line(aes(y=prec_comp, color="Precipitation"))+
+  labs(x="Time", y="Intensity", color="Legend")+
+  scale_color_manual(values = colors)
+
+ggplot(Gland_fin ,aes(x=Date))+
+  geom_point(aes(y=temp_comp, color="Temperature"))+
+  geom_point(aes(y=vent_comp, color="Vent"))+
+  geom_point(aes(y=press_comp, color="Pression"))+
+  geom_point(aes(y=prec_comp, color="Precipitation"))+
+  labs(x="Time", y="Intensity", color="Legend")+
+  scale_color_manual(values = colors)
+
+#plot some station data
 ggplot()+
-  geom_line(data = Gland_Swissquote, aes(y=Bike, x=Date, color = "Bike"), size=1) +
-  geom_line(data = Gland_Swissquote, aes(y=E_Bike, x=Date, Color = "E_bike"), size=1) +
-  geom_line(data = Gland_Swissquote, aes(y=Capacity, x=Date, color = "Capacity"), size=1) +
-  scale_color_manual(values = c("Bike"="blue","E_bike"="black","Capacity"="red")) +
-  labs(color = "Legend") +
+  geom_line(data = Gland_Swissquote, aes(y=Bike, x=Date, color = "red")) +
+  geom_line(data = Gland_Swissquote, aes(y=E_Bike, x=Date, Color = "blue")) +
   ggtitle("Gland_Swissquote")
 
 ggplot()+
@@ -104,6 +143,183 @@ ggplot()+
   ggtitle("Gland_En_Bord")
 
 ```
+
+We select just the bike and the date data for the interested point, we convert everything into tsibble data, and we set date column as index. Doing so, now we have a time series for the bike data at the interested point and it will be easier to build models and to use the autoplot function. After that we will repeat the process for the ebike data, and after this we will do it for the next point.
+
+## Gland Les Tuillières
+```{r}
+#Bike data 
+Gland_Les_Tuillières_Bike_tsibble <- as_tsibble(Gland_Les_Tuillières%>%
+  dplyr::select(Date, "Bike"= Bike), index = Date)
+
+#Ebike data
+Gland_Les_Tuillières_E_Bike_tsibble <- as_tsibble(Gland_Les_Tuillières%>%
+  dplyr::select(Date, "E_Bike"= E_Bike), index = Date)
+
+#autoplot
+autoplot(Gland_Les_Tuillières_Bike_tsibble)
+autoplot(Gland_Les_Tuillières_E_Bike_tsibble)
+```
+## Gland Swissquote
+```{r}
+#Bike data 
+Gland_Swissquote_Bike_tsibble <- as_tsibble(Gland_Swissquote%>%
+  dplyr::select(Date, "Bike"= Bike), index = Date)
+
+#Ebike data
+Gland_Swissquote_E_Bike_tsibble <- as_tsibble(Gland_Swissquote%>%
+  dplyr::select(Date, "E_Bike"= E_Bike), index = Date)
+
+#autoplot
+autoplot(Gland_Swissquote_Bike_tsibble)
+autoplot(Gland_Swissquote_E_Bike_tsibble)
+```
+
+## Gland Gare Sud
+```{r}
+#Bike data 
+Gland_Gare_Sud_Bike_tsibble <- as_tsibble(Gland_Gare_Sud%>%
+  dplyr::select(Date, "Bike"= Bike), index = Date)
+
+#Ebike data
+Gland_Gare_Sud_E_Bike_tsibble <- as_tsibble(Gland_Gare_Sud%>%
+  dplyr::select(Date, "E_Bike"= E_Bike), index = Date)
+
+#autoplot
+autoplot(Gland_Gare_Sud_Bike_tsibble)
+autoplot(Gland_Gare_Sud_E_Bike_tsibble)
+```
+
+## Gland UICN
+```{r}
+#Bike data 
+Gland_UICN_Bike_tsibble <- as_tsibble(Gland_UICN%>%
+  dplyr::select(Date, "Bike"= Bike), index = Date)
+
+#Ebike data
+Gland_UICN_E_Bike_tsibble <- as_tsibble(Gland_UICN%>%
+  dplyr::select(Date, "E_Bike"= E_Bike), index = Date)
+
+#autoplot
+autoplot(Gland_UICN_Bike_tsibble)
+autoplot(Gland_UICN_E_Bike_tsibble)
+```
+
+
+## Gland Montoly
+```{r}
+#Bike data 
+Gland_Montoly_Bike_tsibble <- as_tsibble(Gland_Montoly%>%
+  dplyr::select(Date, "Bike"= Bike), index = Date)
+
+#Ebike data
+Gland_Montoly_E_Bike_tsibble <- as_tsibble(Gland_Montoly%>%
+  dplyr::select(Date, "E_Bike"= E_Bike), index = Date)
+
+#autoplot
+autoplot(Gland_Montoly_Bike_tsibble)
+autoplot(Gland_Montoly_E_Bike_tsibble)
+```
+
+## Gland Grand'Rue
+```{r}
+#Bike data 
+Gland_Grand_Rue_Bike_tsibble <- as_tsibble(Gland_Grand_Rue%>%
+  dplyr::select(Date, "Bike"= Bike), index = Date)
+
+#Ebike data
+Gland_Grand_Rue_E_Bike_tsibble <- as_tsibble(Gland_Grand_Rue%>%
+  dplyr::select(Date, "E_Bike"= E_Bike), index = Date)
+
+#autoplot
+autoplot(Gland_Grand_Rue_Bike_tsibble)
+autoplot(Gland_Grand_Rue_E_Bike_tsibble)
+```
+
+## Gland La Falaise
+```{r}
+#Bike data 
+Gland_La_Falaise_Bike_tsibble <- as_tsibble(Gland_La_Falaise%>%
+  dplyr::select(Date, "Bike"= Bike), index = Date)
+
+#Ebike data
+Gland_La_Falaise_E_Bike_tsibble <- as_tsibble(Gland_La_Falaise%>%
+  dplyr::select(Date, "E_Bike"= E_Bike), index = Date)
+
+#autoplot
+autoplot(Gland_La_Falaise_Bike_tsibble)
+autoplot(Gland_La_Falaise_E_Bike_tsibble)
+```
+
+## Gland La Liginière
+```{r}
+#Bike data 
+Gland_La_Lignière_Bike_tsibble <- as_tsibble(Gland_La_Lignière%>%
+  dplyr::select(Date, "Bike"= Bike), index = Date)
+
+#Ebike data
+Gland_La_Lignière_E_Bike_tsibble <- as_tsibble(Gland_La_Lignière%>%
+  dplyr::select(Date, "E_Bike"= E_Bike), index = Date)
+
+#autoplot
+autoplot(Gland_La_Lignière_Bike_tsibble)
+autoplot(Gland_La_Lignière_E_Bike_tsibble)
+```
+
+## Gland Eiekenott
+```{r}
+#Bike data 
+Gland_Eikenott_Bike_tsibble <- as_tsibble(Gland_Eikenott%>%
+  dplyr::select(Date, "Bike"= Bike), index = Date)
+
+#Ebike data
+Gland_Eikenott_E_Bike_tsibble <- as_tsibble(Gland_Eikenott%>%
+  dplyr::select(Date, "E_Bike"= E_Bike), index = Date)
+
+#autoplot
+autoplot(Gland_Eikenott_Bike_tsibble)
+autoplot(Gland_Eikenott_E_Bike_tsibble)
+```
+
+## Gland La Dôle
+```{r}
+#Bike data 
+Gland_La_Dôle_Bike_tsibble <- as_tsibble(Gland_La_Dôle%>%
+  dplyr::select(Date, "Bike"= Bike), index = Date)
+
+#Ebike data
+Gland_La_Dôle_E_Bike_tsibble <- as_tsibble(Gland_La_Dôle%>%
+  dplyr::select(Date, "E_Bike"= E_Bike), index = Date)
+
+#autoplot
+autoplot(Gland_La_Dôle_Bike_tsibble)
+autoplot(Gland_La_Dôle_E_Bike_tsibble)
+```
+
+## Gland En Bord
+```{r}
+#Bike data 
+Gland_En_Bord_Bike_tsibble <- as_tsibble(Gland_En_Bord%>%
+  dplyr::select(Date, "Bike"= Bike), index = Date)
+
+#Ebike data
+Gland_En_Bord_E_Bike_tsibble <- as_tsibble(Gland_En_Bord%>%
+  dplyr::select(Date, "E_Bike"= E_Bike), index = Date)
+
+#autoplot
+autoplot(Gland_En_Bord_Bike_tsibble)
+autoplot(Gland_En_Bord_E_Bike_tsibble)
+```
+
+We convert the all Gland_fin dataset into tsibble data.
+```{r}
+Gland_fin_tsibble <- as_tsibble(Gland_fin, index = Date)
+```
+
+
+
+
+
 
 1. Gland_Les_Tuillières : No clear trend or seasonality 
 2. Gland_Swissquote : No clear trend or seasonality 
