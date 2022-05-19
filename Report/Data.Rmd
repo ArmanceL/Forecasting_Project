@@ -10,11 +10,212 @@ source(here::here("Setup/setup.R"))
 
 ### Part 1 : Data preparation 
 
-#Load the dataset
+Load the dataset
 ```{r}
 setwd(here::here("Data/")) # Where are the data sets
-load("~/Desktop/Forecasting/Forecasting II/Project 1/Forecasting_Project-main/Bikesharing_dataset.RData")
+load("Bikesharing_dataset_fin.RData")
+Precipitation <- read.csv("order_103137_data.csv", sep = ";")
+Temperature <- read.table("order_103200_data.txt", header = FALSE, sep = ";", colClasses = "character")
+Ensoleillement <- read.table("order_103201_data.txt", header = FALSE, sep = ";", colClasses = "character")
+Vent <- read.table("order_103202_data.txt", header = FALSE, sep = ";", colClasses = "character")
+Pression <- read.table("order_103203_data.txt", header = FALSE, sep = ";", colClasses = "character")
 ```
+Renaming the columns
+```{r}
+colnames(Precipitation) <- c("stn","Time","prec")
+colnames(Temperature) <- c("stn","Time","temp")
+colnames(Ensoleillement) <- c("stn","Time","ensoll")
+colnames(Vent) <- c("stn","Time","vent")
+colnames(Pression) <- c("stn","Time","press")
+```
+
+Building the Date column for weather data
+```{r}
+Precipitation <- Precipitation[c(-1,-2), ] #eliminate the first 2 row not needed
+row.names(Precipitation) <- NULL #reset the index
+```
+First we need to set the temporal data as character data
+```{r}
+Precipitation$Time <- as.character(Precipitation$Time) 
+```
+
+Now for every weather variable we can select the numbers needed from their position into the character value and creating the year/month/day/hour/minute columns.
+```{r}
+Precipitation$Year <- substr(Precipitation$Time,1,4)
+Precipitation$Month <- substr(Precipitation$Time,5,6)
+Precipitation$Day <- substr(Precipitation$Time,7,8)
+Precipitation$Hour <- substr(Precipitation$Time,9,10)
+Precipitation$Minute <- substr(Precipitation$Time,11,12)
+
+Temperature$Year <- substr(Temperature$Time,1,4)
+Temperature$Month <- substr(Temperature$Time,5,6)
+Temperature$Day <- substr(Temperature$Time,7,8)
+Temperature$Hour <- substr(Temperature$Time,9,10)
+Temperature$Minute <- substr(Temperature$Time,11,12)
+
+Ensoleillement$Year <- substr(Ensoleillement$Time,1,4)
+Ensoleillement$Month <- substr(Ensoleillement$Time,5,6)
+Ensoleillement$Day <- substr(Ensoleillement$Time,7,8)
+Ensoleillement$Hour <- substr(Ensoleillement$Time,9,10)
+Ensoleillement$Minute <- substr(Ensoleillement$Time,11,12)
+
+Vent$Year <- substr(Vent$Time,1,4)
+Vent$Month <- substr(Vent$Time,5,6)
+Vent$Day <- substr(Vent$Time,7,8)
+Vent$Hour <- substr(Vent$Time,9,10)
+Vent$Minute <- substr(Vent$Time,11,12)
+
+Pression$Year <- substr(Pression$Time,1,4)
+Pression$Month <- substr(Pression$Time,5,6)
+Pression$Day <- substr(Pression$Time,7,8)
+Pression$Hour <- substr(Pression$Time,9,10)
+Pression$Minute <- substr(Pression$Time,11,12)
+```
+
+Finally we can unite the values by selecting the same rows and adding the needed separators
+```{r}
+Precipitation$Date <- str_c(Precipitation$Year,"-",Precipitation$Month,"-",Precipitation$Day," ",Precipitation$Hour,":",Precipitation$Minute,":","00")
+Temperature$Date <- str_c(Temperature$Year,"-",Temperature$Month,"-",Temperature$Day," ",Temperature$Hour,":",Temperature$Minute,":","00")
+Ensoleillement$Date <- str_c(Ensoleillement$Year,"-",Ensoleillement$Month,"-",Ensoleillement$Day," ",Ensoleillement$Hour,":",Ensoleillement$Minute,":","00")
+Vent$Date <- str_c(Vent$Year,"-",Vent$Month,"-",Vent$Day," ",Vent$Hour,":",Vent$Minute,":","00")
+Pression$Date <- str_c(Pression$Year,"-",Pression$Month,"-",Pression$Day," ",Pression$Hour,":",Pression$Minute,":","00")
+```
+
+Building the dataset for every Gland station
+```{r}
+Gland_Les_Tuillières <- as.data.frame(series["Gland, Les Tuillières"]) #select the station name from the series and converting into a data frame 
+colnames(Gland_Les_Tuillières) <- c("Bike","E_Bike","Capacity","Date","Name") #setting the column names
+
+#repet for every station
+
+Gland_Swissquote <- as.data.frame(series["Gland, Swissquote"])
+colnames(Gland_Swissquote) <- c("Bike","E_Bike","Capacity","Date","Name")
+
+Gland_Gare_Sud <- as.data.frame(series["Gland, Gare Sud, travaux, déplacée de 20m en mars-avril"])
+colnames(Gland_Gare_Sud) <- c("Bike","E_Bike","Capacity","Date","Name")
+
+Gland_UICN <- as.data.frame(series["Gland, UICN"])
+colnames(Gland_UICN) <- c("Bike","E_Bike","Capacity","Date","Name")
+
+Gland_Montoly <- as.data.frame(series["Gland, Montoly"])
+colnames(Gland_Montoly) <- c("Bike","E_Bike","Capacity","Date","Name")
+
+Gland_Grand_Rue <- as.data.frame(series["Gland, Grand'Rue"])
+colnames(Gland_Grand_Rue) <- c("Bike","E_Bike","Capacity","Date","Name")
+
+Gland_La_Falaise <- as.data.frame(series["Gland, La Falaise"])
+colnames(Gland_La_Falaise) <- c("Bike","E_Bike","Capacity","Date","Name")
+
+Gland_La_Lignière <- as.data.frame(series["Gland, La Lignière"])
+colnames(Gland_La_Lignière) <- c("Bike","E_Bike","Capacity","Date","Name")
+
+Gland_Eikenott <- as.data.frame(series["Gland, Eikenott"])
+colnames(Gland_Eikenott) <- c("Bike","E_Bike","Capacity","Date","Name")
+
+Gland_La_Dôle <- as.data.frame(series["Gland, La Dôle"])
+colnames(Gland_La_Dôle) <- c("Bike","E_Bike","Capacity","Date","Name")
+
+Gland_En_Bord <- as.data.frame(series["Gland, En Bord"])
+colnames(Gland_En_Bord) <- c("Bike","E_Bike","Capacity","Date","Name")
+```
+
+Searching for NA values
+```{r}
+which(is.na(Gland_Les_Tuillières))
+which(is.na(Gland_Swissquote))
+which(is.na(Gland_Gare_Sud))
+which(is.na(Gland_UICN))
+which(is.na(Gland_Montoly))
+which(is.na(Gland_Grand_Rue))
+which(is.na(Gland_La_Falaise))
+which(is.na(Gland_La_Lignière))
+which(is.na(Gland_Eikenott))
+which(is.na(Gland_La_Dôle))
+which(is.na(Gland_En_Bord))
+```
+no N/A found
+
+The first 117 observations are 1 per our and not every 10 minuts -> eliminate
+```{r}
+#discover the tot number of observation per station (every station has the same size, just one is needed) 
+nobs <- nrow(Gland_Eikenott)
+
+Gland_Eikenott <- Gland_Eikenott[c(118:nobs), ] #selecting only the observation with the right temporal mesure
+row.names(Gland_Eikenott) <- NULL #reset the index
+Gland_Eikenott$Name <- NULL #eliminate the column name
+
+#repet for every station
+
+Gland_En_Bord <- Gland_En_Bord[c(118:nobs), ]
+row.names(Gland_En_Bord) <- NULL
+Gland_En_Bord$Name <- NULL
+
+Gland_Gare_Sud <- Gland_Gare_Sud[c(118:nobs), ]
+row.names(Gland_Gare_Sud) <- NULL
+Gland_Gare_Sud$Name <- NULL
+
+Gland_Grand_Rue <- Gland_Grand_Rue[c(118:nobs), ]
+row.names(Gland_Grand_Rue) <- NULL
+Gland_Grand_Rue$Name <- NULL
+
+Gland_La_Dôle <- Gland_La_Dôle[c(118:nobs), ]
+row.names(Gland_La_Dôle) <- NULL
+Gland_La_Dôle$Name <- NULL
+
+Gland_La_Falaise <- Gland_La_Falaise[c(118:nobs), ]
+row.names(Gland_La_Falaise) <- NULL
+Gland_La_Falaise$Name <- NULL
+
+Gland_Les_Tuillières <- Gland_Les_Tuillières[c(118:nobs), ]
+row.names(Gland_Les_Tuillières) <- NULL
+Gland_Les_Tuillières$Name <- NULL
+
+Gland_Montoly <- Gland_Montoly[c(118:nobs), ]
+row.names(Gland_Montoly) <- NULL
+Gland_Montoly$Name <- NULL
+
+Gland_Swissquote <- Gland_Swissquote[c(118:nobs), ]
+row.names(Gland_Swissquote) <- NULL
+Gland_Swissquote$Name <- NULL
+
+Gland_UICN <- Gland_UICN[c(118:nobs), ]
+row.names(Gland_UICN) <- NULL
+Gland_UICN$Name <- NULL
+
+Gland_La_Lignière <- Gland_La_Lignière[c(118:nobs), ]
+row.names(Gland_La_Lignière) <- NULL
+Gland_La_Lignière$Name <- NULL
+
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 Load precipitation dataset in Gland 
 ```{r}
