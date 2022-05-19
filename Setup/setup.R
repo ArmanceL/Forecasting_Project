@@ -5,10 +5,11 @@
 # load the required packages
 packages <- c(
   "here", # for the project's organization
-  "readr", "tidyverse", "lubridate", "tsibble", "fpp3", # for wrangling
+  "readr", "tidyverse", "lubridate", "tsibble", "fpp3", "arsenal", # for wrangling
   "ggrepel", "gghighlight", "patchwork", "maps", "scales", "tidyquant", "crosstalk", "ggpubr", "cowplot", "ggfortify",  # for plotting
   "bookdown", "rmarkdown", "knitr", "systemfonts", "kableExtra","plotly", "leaflet", "countrycode", # for the report
-  "stargazer", "corpcor", "corrplot", "ppcor", "GGally", "mctest", "pls", "factoextra" # for the analysis
+  "stargazer", "corpcor", "corrplot", "ppcor", "GGally", "mctest", "pls", "factoextra", # for the analysis
+  "forecast"
 )
 
 purrr::walk(packages, library, character.only = TRUE)
