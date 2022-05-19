@@ -188,171 +188,240 @@ Gland_La_Lignière$Name <- NULL
 
 ```
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-Load precipitation dataset in Gland 
+First and last Date value for every dataset 
 ```{r}
-weather <- read.csv2(here::here("Data/order_103137_data.csv"))
-weather$Year <- substr(weather$time, 1, 4)
-weather$Month <- substr(weather$time, 5, 6)
-weather$Day <- substr(weather$time, 7, 8)
-weather$Hour <- substr(weather$time, 9, 10)
-weather$Minute <- substr(weather$time, 11, 12)
-weather <- weather[-c(1:2)]
-weather <- rename(weather, precipitation = rre150z0)
-#weather$rre150z0 <- as.numeric(weather$rre150z0)
-#weather$Year <- as.numeric(weather$Year)
-#weather$Month <- as.numeric(weather$Month)
-#weather$Day <- as.numeric(weather$Day)
-#weather$Hour <- as.numeric(weather$Hour)
-#weather$Minute <- as.numeric(weather$Minute)
-
-library(dplyr)
-library(ggplot2)
-
-
-weather$Date = str_c(weather$Year,"-",weather$Month,"-",weather$Day," ",weather$Hour,":",weather$Minute,":","00")
-
-weather$Date = as.POSIXlt(weather$Date, tz=" ")
-weather$Date = as.POSIXct(weather$Date)
+Precipitation[ c(1,nrow(Precipitation)), "Date"]
+Gland_Eikenott[ c(1,nrow(Gland_Eikenott)), "Date"]
+Temperature[ c(1,nrow(Temperature)), "Date"] # same as pression, vent, and ensoleillement
 ```
 
-Load temperature dataset 
+Discover the first and the last observation that can be used to compare the different datasets by temporal data   
 ```{r}
-weather2 <- read.csv2(here::here("Data/temperatures_gland.csv"))
+Precipitation[Precipitation$Date=="2022-03-09 15:00:00", ]
 
-weather2$Year <- substr(weather2$time, 1, 4)
-weather2$Month <- substr(weather2$time, 5, 6)
-weather2$Day <- substr(weather2$time, 7, 8)
-weather2$Hour <- substr(weather2$time, 9, 10)
-weather2$Minute <- substr(weather2$time, 11, 12)
-weather2 <- rename(weather2, temperature = tre200s0)
+Temperature[Temperature$Date=="2022-03-09 15:00:00", ]
+Temperature[Temperature$Date=="2022-05-14 23:50:00", ]
 
-#weather$rre150z0 <- as.numeric(weather$rre150z0)
-#weather$Year <- as.numeric(weather$Year)
-#weather$Month <- as.numeric(weather$Month)
-#weather$Day <- as.numeric(weather$Day)
-#weather$Hour <- as.numeric(weather$Hour)
-#weather$Minute <- as.numeric(weather$Minute)
-
-library(dplyr)
-library(ggplot2)
-
-weather2$Date = str_c(weather2$Year,"-",weather2$Month,"-",weather2$Day," ",weather2$Hour,":",weather2$Minute,":","00")
-
-weather2 <- weather2[-c(1:2,4:8)]
-weather2$Date = as.POSIXlt(weather2$Date, tz=" ")
-weather2$Date = as.POSIXct(weather2$Date)
+Gland_Eikenott[Gland_Eikenott$Date=="2022-05-14 23:50:00", ] #BUG --> WHY? need to search the right observation by hand/eyes --> it is the number 9648
 ```
 
-
-
-
-#Building the dataset for every station needed and converting it as a dataframe + renameing the needed columns
+Eliminate the data not comparable
 ```{r}
-Gland_Les_Tuillières <- as.data.frame(series["Gland, Les Tuillières"])
-colnames(Gland_Les_Tuillières) <- c("Bike","E_Bike","Capacity","Date","Name")
+Precipitation <- Precipitation[c(1243:nrow(Precipitation)), ] #select only the data needed
+row.names(Precipitation) <- NULL #reset the index
 
-Gland_Swissquote <- as.data.frame(series["Gland, Swissquote"])
-colnames(Gland_Swissquote) <- c("Bike","E_Bike","Capacity","Date","Name")
+#repet
 
-Gland_Gare_Sud <- as.data.frame(series["Gland, Gare Sud, travaux, déplacée de 20m en mars-avril"])
-colnames(Gland_Gare_Sud) <- c("Bike","E_Bike","Capacity","Date","Name")
+Temperature <- Temperature[c(91:9648), ]
+row.names(Temperature) <- NULL
 
-Gland_UICN <- as.data.frame(series["Gland, UICN"])
-colnames(Gland_UICN) <- c("Bike","E_Bike","Capacity","Date","Name")
+Ensoleillement <- Ensoleillement[c(91:9648), ]
+row.names(Ensoleillement) <- NULL
 
-Gland_Montoly <- as.data.frame(series["Gland, Montoly"])
-colnames(Gland_Montoly) <- c("Bike","E_Bike","Capacity","Date","Name")
+Vent <- Vent[c(91:9648), ]
+row.names(Vent) <- NULL
 
-Gland_Grand_Rue <- as.data.frame(series["Gland, Grand'Rue"])
-colnames(Gland_Grand_Rue) <- c("Bike","E_Bike","Capacity","Date","Name")
+Pression <- Pression[c(91:9648), ]
+row.names(Pression) <- NULL
 
-Gland_La_Falaise <- as.data.frame(series["Gland, La Falaise"])
-colnames(Gland_La_Falaise) <- c("Bike","E_Bike","Capacity","Date","Name")
+Gland_Eikenott <- Gland_Eikenott[c(1:9546), ]
+Gland_En_Bord <- Gland_En_Bord[c(1:9546), ]
+Gland_Gare_Sud <- Gland_Gare_Sud[c(1:9546), ]
+Gland_Grand_Rue <- Gland_Grand_Rue[c(1:9546), ]
+Gland_La_Dôle <- Gland_La_Dôle[c(1:9546), ]
+Gland_La_Falaise <- Gland_La_Falaise[c(1:9546), ]
+Gland_Les_Tuillières <- Gland_Les_Tuillières[c(1:9546), ]
+Gland_Montoly <- Gland_Montoly[c(1:9546), ]
+Gland_Swissquote <- Gland_Swissquote[c(1:9546), ]
+Gland_UICN <- Gland_UICN[c(1:9546), ]
+Gland_La_Lignière <- Gland_La_Lignière[c(1:9546), ]
 
-Gland_La_Lignière <- as.data.frame(series["Gland, La Lignière"])
-colnames(Gland_La_Lignière) <- c("Bike","E_Bike","Capacity","Date","Name")
+#check the first and the last date
+Gland_Eikenott[c(1,nrow(Gland_Eikenott)),"Date"]
+Precipitation[c(1,nrow(Precipitation)),"Date"]
+Temperature[c(1,nrow(Temperature)),"Date"]
 
-Gland_Eikenott <- as.data.frame(series["Gland, Eikenott"])
-colnames(Gland_Eikenott) <- c("Bike","E_Bike","Capacity","Date","Name")
+#check the size of the datasets
+nrow(Gland_Eikenott)
+nrow(Precipitation)
+nrow(Temperature)
+```
+The dates are correct, but the weather data have 12 observation more than the stations  --> it is needed to discover why
 
-Gland_La_Dôle <- as.data.frame(series["Gland, La Dôle"])
-colnames(Gland_La_Dôle) <- c("Bike","E_Bike","Capacity","Date","Name")
+To compare the dates it is needed to solve the UTC difference --> conversion in both GMT
+```{r}
+#Weather variables
 
-Gland_En_Bord <- as.data.frame(series["Gland, En Bord"])
-colnames(Gland_En_Bord) <- c("Bike","E_Bike","Capacity","Date","Name")
+Precipitation$Date <- as.POSIXlt(Precipitation$Date, tz= " ") #converting the date value into POSIXlt and mantaining the space between date and hour
+Precipitation$Date <- as.POSIXct(Precipitation$Date) #converting into POSIXct
+Precipitation <- Precipitation[-c(1,2,4:8)] #eliminate useless columns 
+
+#repeat
+
+Temperature$Date <- as.POSIXlt(Temperature$Date, tz= " ")
+Temperature$Date <- as.POSIXct(Temperature$Date)
+Temperature <- Temperature[-c(1,2,4:8)]
+
+Ensoleillement$Date <- as.POSIXlt(Ensoleillement$Date, tz= " ")
+Ensoleillement$Date <- as.POSIXct(Ensoleillement$Date)
+Ensoleillement <- Ensoleillement[-c(1,2,4:8)]
+
+Vent$Date <- as.POSIXlt(Vent$Date, tz= " ")
+Vent$Date <- as.POSIXct(Vent$Date)
+Vent <- Vent[-c(1,2,4:8)]
+
+Pression$Date <- as.POSIXlt(Pression$Date, tz= " ")
+Pression$Date <- as.POSIXct(Pression$Date)
+Pression <- Pression[-c(1,2,4:8)]
+
+#Stations data
+
+Gland_Eikenott$Date <- as.character(Gland_Eikenott$Date) #date as character
+Gland_Eikenott$Date <- as.POSIXlt(Gland_Eikenott$Date, tz= " ") #repeat the weather procedure
+Gland_Eikenott$Date <- as.POSIXct(Gland_Eikenott$Date)
+
+#repeat
+
+Gland_En_Bord$Date <- as.character(Gland_En_Bord$Date)
+Gland_En_Bord$Date <- as.POSIXlt(Gland_En_Bord$Date, tz= " ")
+Gland_En_Bord$Date <- as.POSIXct(Gland_En_Bord$Date)
+
+Gland_Gare_Sud$Date <- as.character(Gland_Gare_Sud$Date)
+Gland_Gare_Sud$Date <- as.POSIXlt(Gland_Gare_Sud$Date, tz= " ")
+Gland_Gare_Sud$Date <- as.POSIXct(Gland_Gare_Sud$Date)
+
+Gland_Grand_Rue$Date <- as.character(Gland_Grand_Rue$Date)
+Gland_Grand_Rue$Date <- as.POSIXlt(Gland_Grand_Rue$Date, tz= " ")
+Gland_Grand_Rue$Date <- as.POSIXct(Gland_Grand_Rue$Date)
+
+Gland_La_Dôle$Date <- as.character(Gland_La_Dôle$Date)
+Gland_La_Dôle$Date <- as.POSIXlt(Gland_La_Dôle$Date, tz= " ")
+Gland_La_Dôle$Date <- as.POSIXct(Gland_La_Dôle$Date)
+
+Gland_La_Falaise$Date <- as.character(Gland_La_Falaise$Date)
+Gland_La_Falaise$Date <- as.POSIXlt(Gland_La_Falaise$Date, tz= " ")
+Gland_La_Falaise$Date <- as.POSIXct(Gland_La_Falaise$Date)
+
+Gland_Les_Tuillières$Date <- as.character(Gland_Les_Tuillières$Date)
+Gland_Les_Tuillières$Date <- as.POSIXlt(Gland_Les_Tuillières$Date, tz= " ")
+Gland_Les_Tuillières$Date <- as.POSIXct(Gland_Les_Tuillières$Date)
+
+Gland_Montoly$Date <- as.character(Gland_Montoly$Date)
+Gland_Montoly$Date <- as.POSIXlt(Gland_Montoly$Date, tz= " ")
+Gland_Montoly$Date <- as.POSIXct(Gland_Montoly$Date)
+
+Gland_Swissquote$Date <- as.character(Gland_Swissquote$Date)
+Gland_Swissquote$Date <- as.POSIXlt(Gland_Swissquote$Date, tz= " ")
+Gland_Swissquote$Date <- as.POSIXct(Gland_Swissquote$Date)
+
+Gland_UICN$Date <- as.character(Gland_UICN$Date)
+Gland_UICN$Date <- as.POSIXlt(Gland_UICN$Date, tz= " ")
+Gland_UICN$Date <- as.POSIXct(Gland_UICN$Date)
+
+Gland_La_Lignière$Date <- as.character(Gland_La_Lignière$Date)
+Gland_La_Lignière$Date <- as.POSIXlt(Gland_La_Lignière$Date, tz= " ")
+Gland_La_Lignière$Date <- as.POSIXct(Gland_La_Lignière$Date)
+
+#final check
+head(unique(Precipitation$Date))
+head(unique(Temperature$Date))
+head(unique(Gland_Eikenott$Date))
+```
+
+Compare, we select precipitation observations that have as date value a value not in common with station data
+```{r}
+Precipitation[!Precipitation$Date %in% Gland_Eikenott$Date, ]
+```
+
+Build a dataframe with dates not shared
+```{r}
+Date_to_add <- as.data.frame(c(Precipitation$Date[!Precipitation$Date %in% Gland_Eikenott$Date])) #create a data frame with just one column with the dates not shared 
+
+Date_to_add <- Date_to_add%>%
+  add_column(Bike = NA) %>% # add an empty column for Bike
+  add_column(E_Bike = NA) %>% # add an empty column for E_Bike
+  add_column(Capacity = NA) # add an empty column for Capacity
+
+Date_to_add <- Date_to_add[ , c(2,3,4,1)] #same column position as station
+names(Date_to_add)[4] <- "Date" #same column name
+
+Date_to_add
+```
+
+Adding the missing dates to every station
+```{r}
+Gland_Eikenott <- bind_rows(Gland_Eikenott, Date_to_add) #add the missing rows
+Gland_Eikenott <- Gland_Eikenott[order(Gland_Eikenott$Date), ] #order by date
+row.names(Gland_Eikenott) <- NULL #reset the index
+
+#repeat
+
+Gland_En_Bord <- bind_rows(Gland_En_Bord, Date_to_add)
+Gland_En_Bord <- Gland_En_Bord[order(Gland_En_Bord$Date), ]
+row.names(Gland_En_Bord) <- NULL
+
+Gland_Gare_Sud <- bind_rows(Gland_Gare_Sud, Date_to_add)
+Gland_Gare_Sud <- Gland_Gare_Sud[order(Gland_Gare_Sud$Date), ]
+row.names(Gland_Gare_Sud) <- NULL
+
+Gland_Grand_Rue <- bind_rows(Gland_Grand_Rue, Date_to_add)
+Gland_Grand_Rue <- Gland_Grand_Rue[order(Gland_Grand_Rue$Date), ]
+row.names(Gland_Grand_Rue) <- NULL
+
+Gland_La_Dôle <- bind_rows(Gland_La_Dôle, Date_to_add)
+Gland_La_Dôle <- Gland_La_Dôle[order(Gland_La_Dôle$Date), ]
+row.names(Gland_La_Dôle) <- NULL
+
+Gland_La_Falaise <- bind_rows(Gland_La_Falaise, Date_to_add)
+Gland_La_Falaise <- Gland_La_Falaise[order(Gland_La_Falaise$Date), ]
+row.names(Gland_La_Falaise) <- NULL
+
+Gland_Les_Tuillières <- bind_rows(Gland_Les_Tuillières, Date_to_add)
+Gland_Les_Tuillières <- Gland_Les_Tuillières[order(Gland_Les_Tuillières$Date), ]
+row.names(Gland_Les_Tuillières) <- NULL
+
+Gland_Montoly <- bind_rows(Gland_Montoly, Date_to_add)
+Gland_Montoly <- Gland_Montoly[order(Gland_Montoly$Date), ]
+row.names(Gland_Montoly) <- NULL
+
+Gland_Swissquote <- bind_rows(Gland_Swissquote, Date_to_add)
+Gland_Swissquote <- Gland_Swissquote[order(Gland_Swissquote$Date), ]
+row.names(Gland_Swissquote) <- NULL
+
+Gland_UICN <- bind_rows(Gland_UICN, Date_to_add)
+Gland_UICN <- Gland_UICN[order(Gland_UICN$Date), ]
+row.names(Gland_UICN) <- NULL
+
+Gland_La_Lignière <- bind_rows(Gland_La_Lignière, Date_to_add)
+Gland_La_Lignière <- Gland_La_Lignière[order(Gland_La_Lignière$Date), ]
+row.names(Gland_La_Lignière) <- NULL
 
 ```
 
-#searching for NA values
+Final full dataset
+
 ```{r}
-which(is.na(Gland_Les_Tuillières))
-which(is.na(Gland_Swissquote))
-which(is.na(Gland_Gare_Sud))
-which(is.na(Gland_UICN))
-which(is.na(Gland_Montoly))
-which(is.na(Gland_Grand_Rue))
-which(is.na(Gland_La_Falaise))
-which(is.na(Gland_La_Lignière))
-which(is.na(Gland_Eikenott))
-which(is.na(Gland_La_Dôle))
-which(is.na(Gland_En_Bord))
+Gland_tot_clean <- bind_cols(Gland_Eikenott, Gland_En_Bord, Gland_Gare_Sud, Gland_Grand_Rue, Gland_La_Dôle, Gland_La_Falaise, Gland_La_Lignière, Gland_Les_Tuillières, Gland_Montoly, Gland_Swissquote, Gland_UICN, Precipitation, Temperature, Ensoleillement, Vent, Pression) #bind every data frame needed
+Gland_fin <- Gland_tot_clean[-c(8,12,16,20,24,28,32,36,40,44,46,48,50,52,54)]
+Gland_fin <- Gland_fin[ , c(4,1:3,5:39)]
 ```
 
-#Look at the 2 dataset with NA values (both grare sud)
-Gland Gare is composed by 2 dataset with null data because of works changement -> eliminate the null data and bind in a unique dataset 
+Renaming the final dataset
 ```{r}
-#Gland_Gare_Sud1 <- Gland_Gare_Sud1[c(1:256), ]
+colnames(Gland_fin) <- c("Date","Bike_Eikenott", "Ebike_Eikenott", "Capacity_Eikenott", "Bike_En_Bord", "Ebike_En_Bord", "Capacity_En_Bord", "Bike_Gare_Sud", "Ebike_Gare_Sud", "Capacity_Gare_Sud", "Bike_Grand_Rue", "Ebike_Grand_Rue", "Capacity_Grand_Rue", "Bike_La_Dôle", "Ebike_La_Dôle", "Capacity_La_Dôle", "Bike_La_Falaise", "Ebike_La_Falaise", "Capacity_La_Falaise", "Bike_La_Lignière", "Ebike_La_Lignière", "Capacity_La_Lignière", "Bike_Les_Tuillières", "Ebike_Les_Tuillières", "Capacity_Les_Tuillières", "Bike_Montoly", "Ebike_Montoly", "Capacity_Montoly", "Bike_Swissquote", "Ebike_Swissquote", "Capacity_Swissquote", "Bike_UICN", "Ebike_UICN", "Capacity_UICN","prec","temp","ensoll","vent","press")
 
-#Gland_Gare_Sud2 <- Gland_Gare_Sud2[c(257:1975), ]
+Gland_fin$prec <- as.numeric(Gland_fin$prec)
+Gland_fin$temp <- as.numeric(Gland_fin$temp)
+Gland_fin$ensoll <- as.numeric(Gland_fin$ensoll)
+Gland_fin$vent <- as.numeric(Gland_fin$vent)
+Gland_fin$press <- as.numeric(Gland_fin$press)
 
-#Gland_Gare_Sud <- bind_rows(Gland_Gare_Sud1, Gland_Gare_Sud2)
-#Gland_Gare_Sud
+head(Gland_fin)
 ```
 
-The first 117 rows are 1 per our and not every 10 minuts. So we eliminate them.
-```{r}
-nobs <- nrow(Gland_Eikenott)
-Gland_Eikenott <- Gland_Eikenott[c(118:nobs), ]
-Gland_En_Bord <- Gland_En_Bord[c(118:nobs), ]
-Gland_Gare_Sud <- Gland_Gare_Sud[c(118:nobs), ]
-Gland_Grand_Rue <- Gland_Grand_Rue[c(118:nobs), ]
-Gland_La_Dôle <- Gland_La_Dôle[c(118:nobs), ]
-Gland_La_Falaise <- Gland_La_Falaise[c(118:nobs), ]
-Gland_Les_Tuillières <- Gland_Les_Tuillières[c(118:nobs), ]
-Gland_Montoly <- Gland_Montoly[c(118:nobs), ]
-Gland_Swissquote <- Gland_Swissquote[c(118:nobs), ]
-Gland_UICN <- Gland_UICN[c(118:nobs), ]
-Gland_La_Lignière <- Gland_La_Lignière[c(118:nobs), ]
-```
+The dataset is now ready to be used. 
+
+
 
 The city of Gland has 11 stations and each of them has either classic bikes or electric bikes (e-bike). This includes 1858 observations and 2 variables for each station and each type of bike.
 **Stations**:
