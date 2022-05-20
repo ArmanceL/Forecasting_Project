@@ -125,13 +125,13 @@ report(fit)
 fit %>% forecast(h = 144) %>% autoplot(Gland_fin_tsibble)
 ```
 
-Dynamic regression --> pas d'erreur mais ne sort pas de forecast 
+Dynamic regression
 
 ```{r}
 Gland_fin_tsibble %>% gather("var", "value", Bike_Les_Tuillières, temp) %>%
 ggplot(aes(x = Date, y = value)) + geom_line() +
 facet_grid(vars(var), scales = "free_y") +
-labs(y = "", title = "Quarterly changes in US consumption and personal income")
+labs(y = "", title = "Number of bikes borrowed every 10 minutes in Gland Les Tuillières")
 
 fit <- Gland_fin_tsibble %>% model(ARIMA(Bike_Les_Tuillières ~ temp))
 report(fit)
@@ -141,21 +141,31 @@ ggplot(aes(x = Date, y = .resid)) + geom_line() + facet_grid(vars(type), scales 
 
 fit %>% gg_tsresiduals()
 
-future_Gland_fin_tsibble <- new_data(Gland_fin_tsibble, 8) %>% mutate(temp = mean(Gland_fin_tsibble$temp)) 
+future_Gland_fin_tsibble <- new_data(Gland_fin_tsibble, 144) %>% mutate(temp = mean(Gland_fin_tsibble$temp)) 
 forecast(fit, new_data = future_Gland_fin_tsibble, h = 144) %>% autoplot(Gland_fin_tsibble) +
-labs(y = "Percentage change") 
+labs(y = "Forecast of the number of bikes borrowed every 10 minutes in Gland Les Tuillières") 
 ```
 
-Autre code pour dynamic regression mais ne marche pas
+
 ```{r}
-#library(forecast)
-fit <- auto.arima(Gland_fin_tsibble[,"Bike_Eikenott"], xreg=Gland_fin_tsibble[,"temp"])
+Gland_fin_tsibble %>% gather("var", "value", Ebike_Les_Tuillières, temp) %>%
+ggplot(aes(x = Date, y = value)) + geom_line() +
+facet_grid(vars(var), scales = "free_y") +
+labs(y = "", title = "Number of Ebikes borrowed every 10 minutes in Gland Les Tuillières")
 
-#checkresiduals(fit) #quel package ? 
+fit <- Gland_fin_tsibble %>% model(ARIMA(Ebike_Les_Tuillières ~ temp))
+report(fit)
 
-fcast <- forecast(fit, xreg = rep(0.8,8))
-autoplot(fcast) + xlag("Date") + ylag("Bike_Eikenott")
+bind_rows( 'Regression Errors' = as_tibble(residuals(fit, type = "regression")), 'ARIMA Errors' = as_tibble(residuals(fit, type = "innovation")), .id = "type") %>%
+ggplot(aes(x = Date, y = .resid)) + geom_line() + facet_grid(vars(type), scales = "free_y") + labs(y = "")
+
+fit %>% gg_tsresiduals()
+
+future_Gland_fin_tsibble <- new_data(Gland_fin_tsibble, 144) %>% mutate(temp = mean(Gland_fin_tsibble$temp)) 
+forecast(fit, new_data = future_Gland_fin_tsibble, h = 144) %>% autoplot(Gland_fin_tsibble) +
+labs(y = "Forecast of the number of Ebikes borrowed every 10 minutes in Gland Les Tuillières") 
 ```
+
 
 VAR model 
 ```{r}
