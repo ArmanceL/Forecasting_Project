@@ -22,12 +22,8 @@ Gland_fin_tsibble <- mutate_if(Gland_fin_tsibble, is.numeric, ~replace(., is.na(
 
 # 1. Gland Les Tuillières
 
-We do an STL decomposition for *Bikes* in the station "Les Tuillières", to see any seasonality or trend in the time series. We then apply an ETS forecast with no trend and an additive seasonality (multiplicative ? ). 
+We do an STL decomposition for *Bikes* in the station "Les Tuillières", to see any seasonality or trend in the time series. We then apply an ETS forecast with no trend and no seasonality. 
 
-```{r}
-
-
-#le nouveau ne marche pas 
 ```{r}
 #ETS Decomposition Bike data 
 dcmp <- Gland_fin_tsibble %>% model(STL(Bike_Les_Tuillières))
@@ -41,10 +37,10 @@ model(ETS(Bike_Les_Tuillières ~ error("A") + trend("N") + season("N"), opt_crit
 coefficients(fit)
 ```
 
-According to the fit, we should set alpha = 1, which is exactly equal to the naive model, so the latest observation, these attempt in ETS, NAIVE or MEAN look unrelevant...
+According to the fit, we should set alpha = 0.99, which is exactly equal to the naive model, so the latest observation.
 ```{r}
 FIT1 <- Gland_fin_tsibble %>%
-model(ETS(Bike_Les_Tuillières ~ error("A") + trend("N", alpha=0,99) + season("N")))
+model(ETS(Bike_Les_Tuillières ~ error("A") + trend("N", alpha=0.99) + season("N")))
 FIT1 %>% forecast(h = 144) %>% autoplot(Gland_fin_tsibble) +
 theme(legend.position = "none")
 FIT1%>%accuracy()
@@ -61,16 +57,27 @@ forecast_mean_model %>% autoplot(Gland_fin_tsibble, level = NULL) + guides(colou
 ```
 We do the same for the *E_Bike* data, with an STL decomposition and an ETS forecast. 
 ```{r}
-#ETS Decomposition Bike data 
+#STL Decomposition Bike data 
 dcmp <- Gland_fin_tsibble %>% model(STL(Ebike_Les_Tuillières))
 components(dcmp) %>% autoplot() + xlab("Date")
-
-#ETS forecast
-fit <- Gland_fin_tsibble %>%
-model(ETS(Ebike_Les_Tuillières ~ error("A") + trend("N", alpha = 0.5) + season("A")))
-fit %>% forecast(h = 144) %>% autoplot(Gland_fin_tsibble, level = 0) +
-theme(legend.position = "none")
 ```
+
+```{r}
+#ETS forecast
+fit2 <- Gland_fin_tsibble %>%
+model(ETS(Ebike_Les_Tuillières ~ error("A") + trend("N") + season("N"), opt_crit = "mse"))
+coefficients(fit)
+```
+According to the fit, we should set alpha = 0.99, which is exactly equal to the naive model, so the latest observation.
+
+```{r}
+FIT2 <- Gland_fin_tsibble %>%
+model(ETS(Ebike_Les_Tuillières ~ error("A") + trend("N", alpha=0.99) + season("N")))
+FIT2 %>% forecast(h = 144) %>% autoplot(Gland_fin_tsibble) +
+theme(legend.position = "none")
+FIT2%>%accuracy()
+```
+
 We also apply the Mean, the Naive and the S_Naive models. 
 ```{r}
 mean_model <- Gland_fin_tsibble %>% model( Mean = MEAN(Ebike_Les_Tuillières),
