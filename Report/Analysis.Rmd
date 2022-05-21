@@ -117,7 +117,7 @@ The number of borrowed E_bikes at Les Tuillières seems also correlated with pre
 
 Here is a forecast with TSLM() on Bike 
 ```{r}
-fit.BikeTempPreLT <- Gland_fin_tsibble %>% model(TSLM(Bike_Les_Tuillières ~ trend() + season()))
+#fit.BikeTempPreLT <- Gland_fin_tsibble %>% model(TSLM(Bike_Les_Tuillières ~ trend() + season()))
 fc.BikeTempPreLT <- forecast(fit.BikeTempPreLT, h=144)
 fc.BikeTempPreLT %>% autoplot(Gland_fin_tsibble) + xlab("Date") + ylab("Bike_LesTuillieres")
 
@@ -126,7 +126,7 @@ fit.BikeTempPreLT %>% gg_tsresiduals()
 
 Here is a forecast with TSLM() on EBike 
 ```{r}
-fit.EBikeTempPreLT <- Gland_fin_tsibble %>% model(TSLM(Ebike_Les_Tuillières ~ trend() + season()))
+#fit.EBikeTempPreLT <- Gland_fin_tsibble %>% model(TSLM(Ebike_Les_Tuillières ~ trend() + season()))
 fc.EBikeTempPreLT <- forecast(fit.EBikeTempPreLT, h=144)
 fc.EBikeTempPreLT %>% autoplot(Gland_fin_tsibble) + xlab("Date") + ylab("E_Bike_LesTuillieres")
 
