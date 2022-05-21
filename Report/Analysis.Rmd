@@ -146,7 +146,7 @@ report(fit)
 fit %>% forecast(h = 144) %>% autoplot(Gland_fin_tsibble)
 ```
 
-Dynamic regression
+Dynamic regression with temperature. 
 
 ```{r}
 Gland_fin_tsibble %>% gather("var", "value", Bike_Les_Tuillières, temp) %>%
