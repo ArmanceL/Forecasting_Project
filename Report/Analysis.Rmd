@@ -10,32 +10,46 @@ source(here::here("Setup/setup.R"))
 
 ### Part 3 : Analysis 
 
+```{r}
+#library(visdat)
+vis_miss(Gland_fin_tsibble)
+```
+We replace the last missing values by 0 as there are very few.
+```{r}
+Gland_fin_tsibble <- mutate_if(Gland_fin_tsibble, is.integer, ~replace(., is.na(.), 0))
+Gland_fin_tsibble <- mutate_if(Gland_fin_tsibble, is.numeric, ~replace(., is.na(.), 0))
+```
 
 # 1. Gland Les Tuillières
 
 We do an STL decomposition for *Bikes* in the station "Les Tuillières", to see any seasonality or trend in the time series. We then apply an ETS forecast with no trend and an additive seasonality (multiplicative ? ). 
 
 ```{r}
-#ETS Decomposition Bike data 
-#Gland_Les_Tuillières_Bike_tsibble <- Gland_Les_Tuillières_Bike_tsibble %>% fill_gaps(Bike=0,.full = TRUE)
-#dcmp <- Gland_Les_Tuillières_Bike_tsibble %>% model(STL(Bike))
-#components(dcmp) %>% autoplot() + xlab("Year")
-#ETS forecast
-#fit <- Gland_Les_Tuillières_Bike_tsibble %>%
-#model(ETS(Bike ~ error("A") + trend("N", alpha = 0.5) + season("A"), opt_crit = "mse"))
-#fit %>% forecast(h = 144) %>% autoplot(Gland_Les_Tuillières_Bike_tsibble, level = 0) +
-#theme(legend.position = "none")
+
 
 #le nouveau ne marche pas 
+```{r}
+#ETS Decomposition Bike data 
 dcmp <- Gland_fin_tsibble %>% model(STL(Bike_Les_Tuillières))
 components(dcmp) %>% autoplot() + xlab("Date")
-
-#ETS forecast
-fit <- Gland_fin_tsibble %>%
-model(ETS(Bike_Les_Tuillières ~ error("A") + trend("N", alpha = 0.5) + season("A"), opt_crit = "mse"))
-fit %>% forecast(h = 144) %>% autoplot(Gland_fin_tsibble, level = 0) +
-theme(legend.position = "none")
 ```
+
+```{r}
+#ETS forecast
+fit1 <- Gland_fin_tsibble %>%
+model(ETS(Bike_Les_Tuillières ~ error("A") + trend("N") + season("N"), opt_crit = "mse"))
+coefficients(fit)
+```
+
+According to the fit, we should set alpha = 1, which is exactly equal to the naive model, so the latest observation, these attempt in ETS, NAIVE or MEAN look unrelevant...
+```{r}
+FIT1 <- Gland_fin_tsibble %>%
+model(ETS(Bike_Les_Tuillières ~ error("A") + trend("N", alpha=0,99) + season("N")))
+FIT1 %>% forecast(h = 144) %>% autoplot(Gland_fin_tsibble) +
+theme(legend.position = "none")
+FIT1%>%accuracy()
+```
+
 We now apply the Mean, the Naive and the S_Naive models. 
 ```{r}
 mean_model <- Gland_fin_tsibble %>% model( Mean = MEAN(Bike_Les_Tuillières),
