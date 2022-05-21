@@ -53,7 +53,7 @@ Naive = NAIVE(Bike_Les_Tuillières),
 S_Naive = SNAIVE(Bike_Les_Tuillières))
 
 forecast_mean_model1 <- mean_model1 %>% forecast(h = 144) 
-forecast_mean_model %>% autoplot(Gland_fin_tsibble, level = NULL) + guides(colour=guide_legend(title = "Forecast"))
+forecast_mean_model1 %>% autoplot(Gland_fin_tsibble, level = NULL) + guides(colour=guide_legend(title = "Forecast"))
 ```
 We do the same for the *E_Bike* data, with an STL decomposition and an ETS forecast. 
 ```{r}
@@ -85,7 +85,7 @@ Naive = NAIVE(Ebike_Les_Tuillières),
 S_Naive = SNAIVE(Ebike_Les_Tuillières))
 
 forecast_mean_model.1 <- mean_model.1 %>% forecast(h = 144) 
-forecast_mean_model %>% autoplot(Gland_fin_tsibble, level = NULL) + guides(colour=guide_legend(title = "Forecast"))
+forecast_mean_model.1 %>% autoplot(Gland_fin_tsibble, level = NULL) + guides(colour=guide_legend(title = "Forecast"))
 ```
 
 We now fit a multiple linear regression of Bikes with temperatures and precipitations. 
