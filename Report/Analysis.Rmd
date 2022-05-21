@@ -117,7 +117,7 @@ The number of borrowed E_bikes at Les Tuillières seems also correlated with pre
 
 Here is a forecast with TSLM() on Bike 
 ```{r}
-#fit.BikeTempPreLT <- Gland_fin_tsibble %>% model(TSLM(Bike_Les_Tuillières ~ trend() + season()))
+fit.BikeTempPreLT <- Gland_fin_tsibble %>% model(TSLM(Bike_Les_Tuillières ~ trend() + season()))
 fc.BikeTempPreLT <- forecast(fit.BikeTempPreLT, h=144)
 fc.BikeTempPreLT %>% autoplot(Gland_fin_tsibble) + xlab("Date") + ylab("Bike_LesTuillieres")
 
@@ -126,7 +126,7 @@ fit.BikeTempPreLT %>% gg_tsresiduals()
 
 Here is a forecast with TSLM() on EBike 
 ```{r}
-#fit.EBikeTempPreLT <- Gland_fin_tsibble %>% model(TSLM(Ebike_Les_Tuillières ~ trend() + season()))
+fit.EBikeTempPreLT <- Gland_fin_tsibble %>% model(TSLM(Ebike_Les_Tuillières ~ trend() + season()))
 fc.EBikeTempPreLT <- forecast(fit.EBikeTempPreLT, h=144)
 fc.EBikeTempPreLT %>% autoplot(Gland_fin_tsibble) + xlab("Date") + ylab("E_Bike_LesTuillieres")
 
@@ -244,7 +244,7 @@ Naive = NAIVE(Bike_Swissquote),
 S_Naive = SNAIVE(Bike_Swissquote))
 
 forecast_mean_model2 <- mean_model2 %>% forecast(h = 144) 
-forecast_mean_model %>% autoplot(Gland_fin_tsibble, level = NULL) + guides(colour=guide_legend(title = "Forecast"))
+forecast_mean_model2 %>% autoplot(Gland_fin_tsibble, level = NULL) + guides(colour=guide_legend(title = "Forecast"))
 ```
 We do the same for the *E_Bike* data, with an STL decomposition and an ETS forecast. 
 ```{r}
@@ -276,7 +276,7 @@ Naive = NAIVE(Ebike_Swissquote),
 S_Naive = SNAIVE(Ebike_Swissquote))
 
 forecast_mean_model.2 <- mean_model.2 %>% forecast(h = 144) 
-forecast_mean_model %>% autoplot(Gland_fin_tsibble, level = NULL) + guides(colour=guide_legend(title = "Forecast"))
+forecast_mean_model.2 %>% autoplot(Gland_fin_tsibble, level = NULL) + guides(colour=guide_legend(title = "Forecast"))
 ```
 
 We now fit a multiple linear regression of Bikes with temperatures and precipitations. 
@@ -308,7 +308,7 @@ The number of borrowed E_bikes at Swissquote seems correlated with sunlight and 
 
 Here is a forecast with TSLM() on Bike 
 ```{r}
-#fit.BikeTempPreLT <- Gland_fin_tsibble %>% model(TSLM(Bike_Les_Tuillières ~ trend() + season()))
+fit.BikeTempPreLT <- Gland_fin_tsibble %>% model(TSLM(Bike_Les_Tuillières ~ trend() + season()))
 fc.BikeTempPreLT <- forecast(fit.BikeTempPreLT, h=144)
 fc.BikeTempPreLT %>% autoplot(Gland_fin_tsibble) + xlab("Date") + ylab("Bike_LesTuillieres")
 
@@ -317,7 +317,7 @@ fit.BikeTempPreLT %>% gg_tsresiduals()
 
 Here is a forecast with TSLM() on EBike 
 ```{r}
-#fit.EBikeTempPreLT <- Gland_fin_tsibble %>% model(TSLM(Ebike_Les_Tuillières ~ trend() + season()))
+fit.EBikeTempPreLT <- Gland_fin_tsibble %>% model(TSLM(Ebike_Les_Tuillières ~ trend() + season()))
 fc.EBikeTempPreLT <- forecast(fit.EBikeTempPreLT, h=144)
 fc.EBikeTempPreLT %>% autoplot(Gland_fin_tsibble) + xlab("Date") + ylab("E_Bike_LesTuillieres")
 
