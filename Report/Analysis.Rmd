@@ -141,9 +141,9 @@ fitLT <- Gland_fin_tsibble %>%  model(ARIMA(Bike_Les_Tuillières))
 report(fitLT)
 fitLT %>% forecast(h = 144) %>% autoplot(Gland_fin_tsibble)
 
-fitLT <- Gland_fin_tsibble %>%  model(ARIMA(Ebike_Les_Tuillières))
-report(fitLT)
-fitLT %>% forecast(h = 144) %>% autoplot(Gland_fin_tsibble)
+fit.LT <- Gland_fin_tsibble %>%  model(ARIMA(Ebike_Les_Tuillières))
+report(fit.LT)
+fit.LT %>% forecast(h = 144) %>% autoplot(Gland_fin_tsibble)
 ```
 
 Dynamic regression with temperature. 
@@ -187,6 +187,8 @@ forecast(fitDR_eLT, new_data = future_Gland_fin_tsibble.1, h = 144) %>% autoplot
 labs(y = "Forecast of the number of Ebikes borrowed every 10 minutes in Gland Les Tuillières") 
 ```
 
+--> Try dynamic regression with other weather variables
+
 
 VAR model 
 ```{r}
@@ -207,393 +209,207 @@ GEM model
 
 
 # 2. Gland Swissquote
+
+
+We do an STL decomposition for *Bikes* in the station "Swissquote", to see any seasonality or trend in the time series. 
+
 ```{r}
-#Bike data 
-Gland_Swissquote_Bike_tsibble <- as_tsibble(Gland_Swissquote%>%
-  dplyr::select(Date, "Bike"= Bike), index = Date)
-
-#Ebike data
-Gland_Swissquote_E_Bike_tsibble <- as_tsibble(Gland_Swissquote%>%
-  dplyr::select(Date, "E_Bike"= E_Bike), index = Date)
-
-#autoplot
-autoplot(Gland_Swissquote_Bike_tsibble)
-autoplot(Gland_Swissquote_E_Bike_tsibble)
+#ETS Decomposition Bike data 
+dcmp <- Gland_fin_tsibble %>% model(STL(Bike_Swissquote))
+components(dcmp) %>% autoplot() + xlab("Date")
 ```
 
-We do an STL decomposition to see if we could identify any trend or seasonality dor this station. 
+We then apply an ETS forecast with no trend and no seasonality. 
+
 ```{r}
-#Bike data 
-Gland_Swissquote_Bike_tsibble <- Gland_Swissquote_Bike_tsibble %>% fill_gaps(Bike=0,.full = TRUE)
-dcmp <- Gland_Swissquote_Bike_tsibble %>% model(STL(Bike))
-components(dcmp) %>% autoplot() + xlab("Year")
-
-fit <- Gland_Swissquote_Bike_tsibble %>%
-model(ETS(Bike ~ error("A") + trend("N", alpha = 0.8) + season("A")))
-fit %>% forecast(h = 36) %>% autoplot(Gland_Swissquote_Bike_tsibble, level = 0) +
-theme(legend.position = "none")
-
-#EBike data 
-
-Gland_Swissquote_E_Bike_tsibble <- Gland_Swissquote_E_Bike_tsibble %>% fill_gaps(E_Bike=0,.full = TRUE)
-dcmp <- Gland_Swissquote_E_Bike_tsibble %>% model(STL(E_Bike))
-components(dcmp) %>% autoplot() + xlab("Year")
-
-fit <- Gland_Swissquote_E_Bike_tsibble %>%
-model(ETS(E_Bike ~ error("A") + trend("N", alpha = 0.6) + season("A")))
-fit %>% forecast(h = 36) %>% autoplot(Gland_Swissquote_E_Bike_tsibble, level = 0) +
-theme(legend.position = "none")
+#ETS forecast
+fit2 <- Gland_fin_tsibble %>%
+model(ETS(Bike_Swissquote ~ error("A") + trend("N") + season("N"), opt_crit = "mse"))
+coefficients(fit2)
 ```
+
+According to the fit, we should set alpha = 1. 
+```{r}
+FIT2 <- Gland_fin_tsibble %>%
+model(ETS(Bike_Swissquote ~ error("A") + trend("N", alpha=0.99) + season("N")))
+FIT2 %>% forecast(h = 144) %>% autoplot(Gland_fin_tsibble) +
+theme(legend.position = "none")
+FIT2%>%accuracy()
+```
+
+We now apply the Mean, the Naive and the S_Naive models. 
+```{r}
+mean_model2 <- Gland_fin_tsibble %>% model( Mean = MEAN(Bike_Swissquote),
+Naive = NAIVE(Bike_Swissquote),
+S_Naive = SNAIVE(Bike_Swissquote))
+
+forecast_mean_model2 <- mean_model2 %>% forecast(h = 144) 
+forecast_mean_model %>% autoplot(Gland_fin_tsibble, level = NULL) + guides(colour=guide_legend(title = "Forecast"))
+```
+We do the same for the *E_Bike* data, with an STL decomposition and an ETS forecast. 
+```{r}
+#STL Decomposition Bike data 
+dcmp <- Gland_fin_tsibble %>% model(STL(Ebike_Swissquote))
+components(dcmp) %>% autoplot() + xlab("Date")
+```
+We then apply an ETS forecast with no trend and an additive seasonality (season_week, season_day, season_hour ?)
+```{r}
+#ETS forecast
+fit.2 <- Gland_fin_tsibble %>%
+model(ETS(Ebike_Swissquote ~ error("A") + trend("N") + season("A"), opt_crit = "mse"))
+coefficients(fit.2)
+```
+According to the fit, we should set alpha = 0.98.
+
+```{r}
+FIT.2 <- Gland_fin_tsibble %>%
+model(ETS(Ebike_Swissquote ~ error("A") + trend("N", alpha=0.98) + season("A")))
+FIT.2 %>% forecast(h = 144) %>% autoplot(Gland_fin_tsibble) +
+theme(legend.position = "none")
+FIT.2%>%accuracy()
+```
+
+We also apply the Mean, the Naive and the S_Naive models. 
+```{r}
+mean_model.2 <- Gland_fin_tsibble %>% model( Mean = MEAN(Ebike_Swissquote),
+Naive = NAIVE(Ebike_Swissquote),
+S_Naive = SNAIVE(Ebike_Swissquote))
+
+forecast_mean_model.2 <- mean_model.2 %>% forecast(h = 144) 
+forecast_mean_model %>% autoplot(Gland_fin_tsibble, level = NULL) + guides(colour=guide_legend(title = "Forecast"))
+```
+
+We now fit a multiple linear regression of Bikes with temperatures and precipitations. 
+```{r}
+fit.BikeTempPreS <- Gland_fin_tsibble %>%
+model(tslm = TSLM(Bike_Swissquote ~ temp + prec + ensoll + vent + press))
+report(fit.BikeTempPreS)
+```
+The R squares is low (0,135) but precipitation seems to be correlated. However it is not very logical that precipitation is positively correlated with the number of bikes borrowed in the station since the rain should normally not increase this number and rather decrease it. 
+```{r}
+fit.EBikeTempPreS <- Gland_fin_tsibble %>%
+model(tslm = TSLM(Ebike_Swissquote ~ temp + prec + ensoll + vent + press))
+report(fit.EBikeTempPreS)
+```
+Here, for E_Bikes the results seem more convincing since precipitation is negatively correlated with the number of E_bikes borrowed. Moreover, the sunlight is positively correlated. 
+
+Let's see the correlation between these weather variables and Bikes at Swissquote.
+```{r}
+Gland_fin_tsibble %>% GGally::ggpairs(columns = c(29,35:39))
+```
+The number of borrowed bikes at Swissquote seems positively correlated with pressure (0,227***) and the wind.
+
+Let's see the correlation between these weather variables and E_Bikes at Swissquote.
+```{r}
+Gland_fin_tsibble %>% GGally::ggpairs(columns = c(30,35:39))
+```
+
+The number of borrowed E_bikes at Swissquote seems correlated with sunlight and temperature.
+
+Here is a forecast with TSLM() on Bike 
+```{r}
+#fit.BikeTempPreLT <- Gland_fin_tsibble %>% model(TSLM(Bike_Les_Tuillières ~ trend() + season()))
+fc.BikeTempPreLT <- forecast(fit.BikeTempPreLT, h=144)
+fc.BikeTempPreLT %>% autoplot(Gland_fin_tsibble) + xlab("Date") + ylab("Bike_LesTuillieres")
+
+fit.BikeTempPreLT %>% gg_tsresiduals()
+```
+
+Here is a forecast with TSLM() on EBike 
+```{r}
+#fit.EBikeTempPreLT <- Gland_fin_tsibble %>% model(TSLM(Ebike_Les_Tuillières ~ trend() + season()))
+fc.EBikeTempPreLT <- forecast(fit.EBikeTempPreLT, h=144)
+fc.EBikeTempPreLT %>% autoplot(Gland_fin_tsibble) + xlab("Date") + ylab("E_Bike_LesTuillieres")
+
+fit.EBikeTempPreLT %>% gg_tsresiduals()
+```
+
+
+ARIMA model on Bike and Ebike 
+
+```{r}
+fitS <- Gland_fin_tsibble %>%  model(ARIMA(Bike_Swissquote))
+report(fitS)
+fitS %>% forecast(h = 144) %>% autoplot(Gland_fin_tsibble)
+
+fit.S <- Gland_fin_tsibble %>%  model(ARIMA(Ebike_Swissquote))
+report(fit.S)
+fit.S %>% forecast(h = 144) %>% autoplot(Gland_fin_tsibble)
+```
+
+Dynamic regression with temperature 
+
+```{r}
+Gland_fin_tsibble %>% gather("var", "value", Bike_Swissquote, temp) %>%
+ggplot(aes(x = Date, y = value)) + geom_line() +
+facet_grid(vars(var), scales = "free_y") +
+labs(y = "", title = "Number of bikes borrowed every 10 minutes in Gland Swissquote")
+
+fitDR_S <- Gland_fin_tsibble %>% model(ARIMA(Bike_Swissquote ~ temp))
+report(fitDR_S)
+
+bind_rows( 'Regression Errors' = as_tibble(residuals(fitDR_S, type = "regression")), 'ARIMA Errors' = as_tibble(residuals(fitDR_S, type = "innovation")), .id = "type") %>%
+ggplot(aes(x = Date, y = .resid)) + geom_line() + facet_grid(vars(type), scales = "free_y") + labs(y = "")
+
+fitDR_S %>% gg_tsresiduals()
+
+future_Gland_fin_tsibble2 <- new_data(Gland_fin_tsibble, 144) %>% mutate(temp = mean(Gland_fin_tsibble$temp)) 
+forecast(fitDR_S, new_data = future_Gland_fin_tsibble2, h = 144) %>% autoplot(Gland_fin_tsibble) +
+labs(y = "Forecast of the number of bikes borrowed every 10 minutes in Gland Swissquote") 
+```
+
+
+```{r}
+Gland_fin_tsibble %>% gather("var", "value", Ebike_Swissquote, temp) %>%
+ggplot(aes(x = Date, y = value)) + geom_line() +
+facet_grid(vars(var), scales = "free_y") +
+labs(y = "", title = "Number of Ebikes borrowed every 10 minutes in Gland Swissquote")
+
+fitDR_eS <- Gland_fin_tsibble %>% model(ARIMA(Ebike_Swissquote ~ temp))
+report(fitDR_eS)
+
+bind_rows( 'Regression Errors' = as_tibble(residuals(fitDR_eS, type = "regression")), 'ARIMA Errors' = as_tibble(residuals(fitDR_eS, type = "innovation")), .id = "type") %>%
+ggplot(aes(x = Date, y = .resid)) + geom_line() + facet_grid(vars(type), scales = "free_y") + labs(y = "")
+
+fitDR_eS %>% gg_tsresiduals()
+
+future_Gland_fin_tsibble.2 <- new_data(Gland_fin_tsibble, 144) %>% mutate(temp = mean(Gland_fin_tsibble$temp)) 
+forecast(fitDR_eS, new_data = future_Gland_fin_tsibble.2, h = 144) %>% autoplot(Gland_fin_tsibble) +
+labs(y = "Forecast of the number of Ebikes borrowed every 10 minutes in Gland Swissquote") 
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 # 3. Gland Gare Sud
-```{r}
-#Bike data 
-Gland_Gare_Sud_Bike_tsibble <- as_tsibble(Gland_Gare_Sud%>%
-  dplyr::select(Date, "Bike"= Bike), index = Date)
 
-#Ebike data
-Gland_Gare_Sud_E_Bike_tsibble <- as_tsibble(Gland_Gare_Sud%>%
-  dplyr::select(Date, "E_Bike"= E_Bike), index = Date)
-
-#autoplot
-autoplot(Gland_Gare_Sud_Bike_tsibble)
-autoplot(Gland_Gare_Sud_E_Bike_tsibble)
-```
-
-We do an STL decomposition to see if we could identify any trend or seasonality dor this station. 
-```{r}
-#Bike data 
-Gland_Gare_Sud_Bike_tsibble <- Gland_Gare_Sud_Bike_tsibble %>% fill_gaps(Bike=0,.full = TRUE)
-dcmp <- Gland_Gare_Sud_Bike_tsibble %>% model(STL(Bike))
-components(dcmp) %>% autoplot() + xlab("Year")
-
-fit <- Gland_Gare_Sud_Bike_tsibble %>%
-model(ETS(Bike ~ error("A") + trend("N", alpha = 0.8) + season("A")))
-fit %>% forecast(h = 36) %>% autoplot(Gland_Gare_Sud_Bike_tsibble, level = 0) +
-theme(legend.position = "none")
-
-#EBike data 
-
-Gland_Gare_Sud_E_Bike_tsibble <- Gland_Gare_Sud_E_Bike_tsibble %>% fill_gaps(E_Bike=0,.full = TRUE)
-dcmp <- Gland_Gare_Sud_E_Bike_tsibble %>% model(STL(E_Bike))
-components(dcmp) %>% autoplot() + xlab("Year")
-
-fit <- Gland_Gare_Sud_E_Bike_tsibble %>%
-model(ETS(E_Bike ~ error("A") + trend("N", alpha = 0.6) + season("A")))
-fit %>% forecast(h = 36) %>% autoplot(Gland_Gare_Sud_E_Bike_tsibble, level = 0) +
-theme(legend.position = "none")
-```
 # 4. Gland UICN
-```{r}
-#Bike data 
-Gland_UICN_Bike_tsibble <- as_tsibble(Gland_UICN%>%
-  dplyr::select(Date, "Bike"= Bike), index = Date)
 
-#Ebike data
-Gland_UICN_E_Bike_tsibble <- as_tsibble(Gland_UICN%>%
-  dplyr::select(Date, "E_Bike"= E_Bike), index = Date)
-
-#autoplot
-autoplot(Gland_UICN_Bike_tsibble)
-autoplot(Gland_UICN_E_Bike_tsibble)
-```
-
-We do an STL decomposition to see if we could identify any trend or seasonality dor this station. 
-```{r}
-#Bike data forecast
-Gland_UICN_Bike_tsibble <- Gland_UICN_Bike_tsibble %>% fill_gaps(Bike=0,.full = TRUE) #utiliser Bike=na.locf 
-
-#Gland_UICN_Bike_tsibble%>%gg_season(y=Bike)
-#decompo STL pas possible 
-
-
-mean_model <- Gland_UICN_Bike_tsibble %>% model( Mean = MEAN(Bike),
-Naive = NAIVE(Bike),
-S_Naive = SNAIVE(Bike))
-
-forecast_mean_model <- mean_model %>% forecast(h = 36) 
-forecast_mean_model %>% autoplot(Gland_UICN_Bike_tsibble, level = NULL) + guides(colour=guide_legend(title = "Forecast"))
-
-#mean_model %>% accuracy
-#beef.fit.NAIVE %>% accuracy()
-#beef.fit.SNAIVE %>% accuracy()
-
-#EBike data forecast
-Gland_UICN_E_Bike_tsibble <- Gland_UICN_E_Bike_tsibble %>% fill_gaps(E_Bike=0,.full = TRUE) #na.locf marche pas 
-
-dcmp <- Gland_UICN_E_Bike_tsibble %>% model(STL(E_Bike))
-components(dcmp) %>% autoplot() + xlab("Year")
-
-fit <- Gland_UICN_E_Bike_tsibble %>%
-model(ETS(E_Bike ~ error("A") + trend("N", alpha = 0.5) + season("A")))
-fit %>% forecast(h = 36) %>% autoplot(Gland_UICN_E_Bike_tsibble, level = 0) +
-theme(legend.position = "none")
-```
 # 5. Gland Montoly
-```{r}
-#Bike data 
-Gland_Montoly_Bike_tsibble <- as_tsibble(Gland_Montoly%>%
-  dplyr::select(Date, "Bike"= Bike), index = Date)
-
-#Ebike data
-Gland_Montoly_E_Bike_tsibble <- as_tsibble(Gland_Montoly%>%
-  dplyr::select(Date, "E_Bike"= E_Bike), index = Date)
-
-#autoplot
-autoplot(Gland_Montoly_Bike_tsibble)
-autoplot(Gland_Montoly_E_Bike_tsibble)
-```
-
-We do an STL decomposition to see if we could identify any trend or seasonality dor this station. 
-```{r}
-#Bike data forecast
-Gland_Montoly_Bike_tsibble <- Gland_Montoly_Bike_tsibble %>% fill_gaps(Bike=0,.full = TRUE) #utiliser Bike=na.locf 
-
-dcmp <- Gland_Montoly_Bike_tsibble %>% model(STL(Bike))
-components(dcmp) %>% autoplot() + xlab("Year")
-
-fit <- Gland_Montoly_Bike_tsibble %>%
-model(ETS(Bike ~ error("A") + trend("N", alpha = 0.1) + season("N")))
-fit %>% forecast(h = 36) %>% autoplot(Gland_Montoly_Bike_tsibble, level = 0) +
-theme(legend.position = "none")
-
-#EBike data forecast
-Gland_Montoly_E_Bike_tsibble <- Gland_Montoly_E_Bike_tsibble %>% fill_gaps(E_Bike=0,.full = TRUE) #na.locf marche pas 
-
-dcmp <- Gland_Montoly_E_Bike_tsibble %>% model(STL(E_Bike))
-components(dcmp) %>% autoplot() + xlab("Year")
-
-fit <- Gland_Montoly_E_Bike_tsibble %>%
-model(ETS(E_Bike ~ error("A") + trend("N", alpha = 0.2) + season("N")))
-fit %>% forecast(h = 36) %>% autoplot(Gland_Montoly_E_Bike_tsibble, level = 0) +
-theme(legend.position = "none")
-
-fit %>% forecast(h = 24) %>% autoplot(Gland_Montoly_E_Bike_tsibble) +
-geom_line(aes(y = .fitted, colour = "Fitted"), data = augment(fit)) +
-ylab("Gland_Montoly_E_Bike") + xlab("DATE")
-```
 
 # 6. Gland Grande Rue
-```{r}
-#Bike data 
-Gland_Grand_Rue_Bike_tsibble <- as_tsibble(Gland_Grand_Rue%>%
-  dplyr::select(Date, "Bike"= Bike), index = Date)
-
-#Ebike data
-Gland_Grand_Rue_E_Bike_tsibble <- as_tsibble(Gland_Grand_Rue%>%
-  dplyr::select(Date, "E_Bike"= E_Bike), index = Date)
-
-#autoplot
-autoplot(Gland_Grand_Rue_Bike_tsibble)
-autoplot(Gland_Grand_Rue_E_Bike_tsibble)
-```
-We do an STL decomposition to see if we could identify any trend or seasonality dor this station. 
-```{r}
-#Bike data forecast
-Gland_Grand_Rue_Bike_tsibble <- Gland_Grand_Rue_Bike_tsibble %>% fill_gaps(Bike=0,.full = TRUE) #utiliser Bike=na.locf 
-
-dcmp <- Gland_Grand_Rue_Bike_tsibble %>% model(STL(Bike))
-components(dcmp) %>% autoplot() + xlab("Year")
-
-fit <- Gland_Grand_Rue_Bike_tsibble %>%
-model(ETS(Bike ~ error("A") + trend("N", alpha = 0.1) + season("A")))
-fit %>% forecast(h = 24) %>% autoplot(Gland_Grand_Rue_Bike_tsibble, level = 0) +
-theme(legend.position = "none")
-
-#EBike data forecast
-Gland_Grand_Rue_E_Bike_tsibble <- Gland_Grand_Rue_E_Bike_tsibble %>% fill_gaps(E_Bike=0,.full = TRUE) #na.locf marche pas 
-
-dcmp <- Gland_Grand_Rue_E_Bike_tsibble %>% model(STL(E_Bike))
-components(dcmp) %>% autoplot() + xlab("Year")
-
-fit <- Gland_Grand_Rue_E_Bike_tsibble %>%
-model(ETS(E_Bike ~ error("A") + trend("N", alpha = 0.1) + season("A")))
-fit %>% forecast(h = 24) %>% autoplot(Gland_Grand_Rue_E_Bike_tsibble, level = 0) +
-theme(legend.position = "none")
-```
 
 
 # 7. Gland La Falaise
-```{r}
-#Bike data 
-Gland_La_Falaise_Bike_tsibble <- as_tsibble(Gland_La_Falaise%>%
-  dplyr::select(Date, "Bike"= Bike), index = Date)
 
-#Ebike data
-Gland_La_Falaise_E_Bike_tsibble <- as_tsibble(Gland_La_Falaise%>%
-  dplyr::select(Date, "E_Bike"= E_Bike), index = Date)
-
-#autoplot
-autoplot(Gland_La_Falaise_Bike_tsibble)
-autoplot(Gland_La_Falaise_E_Bike_tsibble)
-```
-
-We do an STL decomposition to see if we could identify any trend or seasonality dor this station. 
-```{r}
-#Bike data 
-Gland_La_Falaise_Bike_tsibble <- Gland_La_Falaise_Bike_tsibble %>% fill_gaps(Bike=0,.full = TRUE)
-dcmp <- Gland_La_Falaise_Bike_tsibble %>% model(STL(Bike))
-components(dcmp) %>% autoplot() + xlab("Year")
-
-fit <- Gland_La_Falaise_Bike_tsibble %>%
-model(ETS(Bike ~ error("A") + trend("N", alpha = 0.8) + season("A")))
-fit %>% forecast(h = 36) %>% autoplot(Gland_La_Falaise_Bike_tsibble, level = 0) +
-theme(legend.position = "none")
-
-#EBike data 
-
-Gland_La_Falaise_E_Bike_tsibble <- Gland_La_Falaise_E_Bike_tsibble %>% fill_gaps(E_Bike=0,.full = TRUE)
-dcmp <- Gland_La_Falaise_E_Bike_tsibble %>% model(STL(E_Bike))
-components(dcmp) %>% autoplot() + xlab("Year")
-
-fit <- Gland_La_Falaise_E_Bike_tsibble %>%
-model(ETS(E_Bike ~ error("A") + trend("N", alpha = 0.6) + season("A")))
-fit %>% forecast(h = 36) %>% autoplot(Gland_La_Falaise_E_Bike_tsibble, level = 0) +
-theme(legend.position = "none")
-```
 
 # 8. Gland La Liginière
-```{r}
-#Bike data 
-Gland_La_Lignière_Bike_tsibble <- as_tsibble(Gland_La_Lignière%>%
-  dplyr::select(Date, "Bike"= Bike), index = Date)
 
-#Ebike data
-Gland_La_Lignière_E_Bike_tsibble <- as_tsibble(Gland_La_Lignière%>%
-  dplyr::select(Date, "E_Bike"= E_Bike), index = Date)
-
-#autoplot
-autoplot(Gland_La_Lignière_Bike_tsibble)
-autoplot(Gland_La_Lignière_E_Bike_tsibble)
-```
-We do an STL decomposition to see if we could identify any trend or seasonality dor this station.
-```{r}
-#Bike data 
-Gland_La_Lignière_Bike_tsibble <- Gland_La_Lignière_Bike_tsibble %>% fill_gaps(Bike=0,.full = TRUE)
-dcmp <- Gland_La_Lignière_Bike_tsibble %>% model(STL(Bike))
-components(dcmp) %>% autoplot() + xlab("Year")
-
-fit <- Gland_La_Lignière_Bike_tsibble %>%
-model(ETS(Bike ~ error("A") + trend("N", alpha = 0.8) + season("A")))
-fit %>% forecast(h = 36) %>% autoplot(Gland_La_Lignière_Bike_tsibble, level = 0) +
-theme(legend.position = "none")
-
-#EBike data 
-
-Gland_La_Lignière_E_Bike_tsibble <- Gland_La_Lignière_E_Bike_tsibble %>% fill_gaps(E_Bike=0,.full = TRUE)
-dcmp <- Gland_La_Lignière_E_Bike_tsibble %>% model(STL(E_Bike))
-components(dcmp) %>% autoplot() + xlab("Year")
-
-fit <- Gland_La_Lignière_E_Bike_tsibble %>%
-model(ETS(E_Bike ~ error("A") + trend("N", alpha = 0.6) + season("A")))
-fit %>% forecast(h = 36) %>% autoplot(Gland_La_Lignière_E_Bike_tsibble, level = 0) +
-theme(legend.position = "none")
-```
 
 # 9. Gland Eiekenott
-```{r}
-#Bike data 
-Gland_Eikenott_Bike_tsibble <- as_tsibble(Gland_Eikenott%>%
-  dplyr::select(Date, "Bike"= Bike), index = Date)
-
-#Ebike data
-Gland_Eikenott_E_Bike_tsibble <- as_tsibble(Gland_Eikenott%>%
-  dplyr::select(Date, "E_Bike"= E_Bike), index = Date)
-
-#autoplot
-autoplot(Gland_Eikenott_Bike_tsibble)
-autoplot(Gland_Eikenott_E_Bike_tsibble)
-```
-
-```{r}
-#Bike data 
-Gland_Eikenott_Bike_tsibble <- Gland_Eikenott_Bike_tsibble %>% fill_gaps(Bike=0,.full = TRUE)
-dcmp <- Gland_Eikenott_Bike_tsibble %>% model(STL(Bike))
-components(dcmp) %>% autoplot() + xlab("Year")
-fit <- Gland_Eikenott_Bike_tsibble %>%
-model(ETS(Bike ~ error("A") + trend("N", alpha = 0.8) + season("A")))
-fit %>% forecast(h = 36) %>% autoplot(Gland_Eikenott_Bike_tsibble, level = 0) +
-theme(legend.position = "none")
-#EBike data 
-Gland_Eikenott_E_Bike_tsibble <- Gland_Eikenott_E_Bike_tsibble %>% fill_gaps(E_Bike=0,.full = TRUE)
-dcmp <- Gland_Eikenott_E_Bike_tsibble %>% model(STL(E_Bike))
-components(dcmp) %>% autoplot() + xlab("Year")
-fit <- Gland_Eikenott_E_Bike_tsibble %>%
-model(ETS(E_Bike ~ error("A") + trend("N", alpha = 0.6) + season("A")))
-fit %>% forecast(h = 36) %>% autoplot(Gland_Eikenott_E_Bike_tsibble, level = 0) +
-theme(legend.position = "none")
-```
-
 
 # 10. Gland La Dôle
-```{r}
-#Bike data 
-Gland_La_Dôle_Bike_tsibble <- as_tsibble(Gland_La_Dôle%>%
-  dplyr::select(Date, "Bike"= Bike), index = Date)
-
-#Ebike data
-Gland_La_Dôle_E_Bike_tsibble <- as_tsibble(Gland_La_Dôle%>%
-  dplyr::select(Date, "E_Bike"= E_Bike), index = Date)
-
-#autoplot
-autoplot(Gland_La_Dôle_Bike_tsibble)
-autoplot(Gland_La_Dôle_E_Bike_tsibble)
-```
-
-```{r}
-#Bike data 
-Gland_La_Dôle_Bike_tsibble <- Gland_La_Dôle_Bike_tsibble %>% fill_gaps(Bike=0,.full = TRUE)
-dcmp <- Gland_La_Dôle_Bike_tsibble %>% model(STL(Bike))
-components(dcmp) %>% autoplot() + xlab("Year")
-fit <- Gland_La_Dôle_Bike_tsibble %>%
-model(ETS(Bike ~ error("A") + trend("N", alpha = 0.8) + season("A")))
-fit %>% forecast(h = 36) %>% autoplot(Gland_La_Dôle_Bike_tsibble, level = 0) +
-theme(legend.position = "none")
-#EBike data 
-Gland_La_Dôle_E_Bike_tsibble <- Gland_La_Dôle_E_Bike_tsibble %>% fill_gaps(E_Bike=0,.full = TRUE)
-dcmp <- Gland_La_Dôle_E_Bike_tsibble %>% model(STL(E_Bike))
-components(dcmp) %>% autoplot() + xlab("Year")
-fit <- Gland_La_Dôle_E_Bike_tsibble %>%
-model(ETS(E_Bike ~ error("A") + trend("N", alpha = 0.6) + season("A")))
-fit %>% forecast(h = 36) %>% autoplot(Gland_La_Dôle_E_Bike_tsibble, level = 0) +
-theme(legend.position = "none")
-```
 
 
 # 11. Gland En Bord
-```{r}
-#Bike data 
-Gland_En_Bord_Bike_tsibble <- as_tsibble(Gland_En_Bord%>%
-  dplyr::select(Date, "Bike"= Bike), index = Date)
-
-#Ebike data
-Gland_En_Bord_E_Bike_tsibble <- as_tsibble(Gland_En_Bord%>%
-  dplyr::select(Date, "E_Bike"= E_Bike), index = Date)
-
-#autoplot
-autoplot(Gland_En_Bord_Bike_tsibble)
-autoplot(Gland_En_Bord_E_Bike_tsibble)
-```
-
-```{r}
-#Bike data forecast
-Gland_En_Bord_Bike_tsibble <- Gland_En_Bord_Bike_tsibble %>% fill_gaps(Bike=0,.full = TRUE) #utiliser Bike=na.locf 
-
-dcmp <- Gland_En_Bord_Bike_tsibble %>% model(STL(Bike))
-components(dcmp) %>% autoplot() + xlab("Year")
-
-fit <- Gland_En_Bord_Bike_tsibble %>%
-  model(ETS(Bike ~ error("A") + trend("N", alpha = 0.1) + season("A")))
-fit %>% forecast(h = 24) %>% autoplot(Gland_En_Bord_Bike_tsibble, level = 0) +
-theme(legend.position = "none")
-
-#EBike data forecast
-Gland_En_Bord_E_Bike_tsibble <- Gland_En_Bord_E_Bike_tsibble %>% fill_gaps(E_Bike=0,.full = TRUE) #na.locf marche pas 
-
-dcmp <- Gland_En_Bord_E_Bike_tsibble %>% model(STL(E_Bike))
-components(dcmp) %>% autoplot() + xlab("Year")
-
-fit <- Gland_En_Bord_E_Bike_tsibble %>%
-  model(ETS(E_Bike ~ error("A") + trend("N", alpha = 0.1) + season("A")))
-fit %>% forecast(h = 24) %>% autoplot(Gland_En_Bord_E_Bike_tsibble, level = 0) +
-theme(legend.position = "none")
-```
