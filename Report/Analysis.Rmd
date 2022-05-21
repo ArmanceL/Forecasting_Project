@@ -389,27 +389,1215 @@ labs(y = "Forecast of the number of Ebikes borrowed every 10 minutes in Gland Sw
 
 
 
-
-
-
+------------------------------------------------------------------------------------------------------------------------------
 # 3. Gland Gare Sud
 
+### 3.1 STL Decomposition Bike
+```{r}
+#ETS Decomposition Bike data 
+dcmp <- Gland_fin_tsibble %>% model(STL(Bike_Gare_Sud))
+components(dcmp) %>% autoplot() + xlab("Date")
+```
+
+### ETS Model Bike
+```{r}
+#ETS forecast
+fit3 <- Gland_fin_tsibble %>%
+model(ETS(Bike_Gare_Sud ~ error("A") + trend("N") + season("N"), opt_crit = "mse"))
+coefficients(fit3)
+```
+
+According to the fit, we should set alpha = 0.94.
+```{r}
+FIT3 <- Gland_fin_tsibble %>%
+model(ETS(Bike_Gare_Sud ~ error("A") + trend("N", alpha=0.94) + season("N")))
+FIT3 %>% forecast(h = 144) %>% autoplot(Gland_fin_tsibble) +
+theme(legend.position = "none")
+FIT3%>%accuracy()
+```
+RMSE = 0.295
+
+### Mean/Naive/S_Naive Model Bike
+```{r}
+mean_model3 <- Gland_fin_tsibble %>% model( Mean = MEAN(Bike_Gare_Sud),
+Naive = NAIVE(Bike_Gare_Sud),
+S_Naive = SNAIVE(Bike_Gare_Sud))
+
+forecast_mean_model3 <- mean_model3 %>% forecast(h = 144) 
+forecast_mean_model3 %>% autoplot(Gland_fin_tsibble, level = NULL) + guides(colour=guide_legend(title = "Forecast"))
+```
+
+### STL decomposition E-Bike
+```{r}
+#STL Decomposition Bike data 
+dcmp <- Gland_fin_tsibble %>% model(STL(Ebike_Gare_Sud))
+components(dcmp) %>% autoplot() + xlab("Date")
+```
+
+### ETS Model E-Bike
+```{r}
+#ETS forecast
+fit.3 <- Gland_fin_tsibble %>%
+model(ETS(Ebike_Gare_Sud ~ error("A") + trend("N") + season("N"), opt_crit = "mse"))
+coefficients(fit.3)
+```
+
+According to the fit, we should set alpha = 0.95.
+```{r}
+FIT.3 <- Gland_fin_tsibble %>%
+model(ETS(Ebike_Gare_Sud ~ error("A") + trend("N", alpha=0.95) + season("N")))
+FIT.3 %>% forecast(h = 144) %>% autoplot(Gland_fin_tsibble) +
+theme(legend.position = "none")
+FIT.3%>%accuracy()
+```
+RMSE = 0.442
+
+### Mean/Naive/S_Naive Model E-Bike
+```{r}
+mean_model.3 <- Gland_fin_tsibble %>% model( Mean = MEAN(Ebike_Gare_Sud),
+Naive = NAIVE(Ebike_Gare_Sud),
+S_Naive = SNAIVE(Ebike_Gare_Sud))
+
+forecast_mean_model.3 <- mean_model.3 %>% forecast(h = 144) 
+forecast_mean_model.3 %>% autoplot(Gland_fin_tsibble, level = NULL) + guides(colour=guide_legend(title = "Forecast"))
+```
+
+### Multiple linear regression Model Bike
+We now fit a multiple linear regression of Bikes with temperatures and precipitations. 
+```{r}
+fit.BikeTempPreLT3 <- Gland_fin_tsibble %>%
+model(tslm = TSLM(Bike_Gare_Sud ~ temp + prec + ensoll + vent + press))
+report(fit.BikeTempPreLT3)
+```
+The R squares is low (0,105) but radiation and wind and seem to be positively correlated and pression positively correlated.  
+
+### Multiple linear regression Model Bike
+```{r}
+fit.EBikeTempPreLT.3 <- Gland_fin_tsibble %>%
+model(tslm = TSLM(Ebike_Gare_Sud ~ temp + prec + ensoll + vent + press))
+report(fit.EBikeTempPreLT.3)
+```
+Here, for E_Bikes all the results seem to be correlated but the R-squared is significantly low. Moreover, it is a little bit surprising that the radiation is negatively correlated, it should be the contrary.
+
+Let's see the correlation between these weather variables and Bikes at Gare_Sud
+```{r}
+Gland_fin_tsibble %>% GGally::ggpairs(columns = c(8,35:39))
+```
+The number of borrowed bikes at Gare_Sud seems negatively correlated with wind (-0,212***).
+
+Let's see the correlation between these weather variables and E_Bikes at Gare_Sud.
+```{r}
+Gland_fin_tsibble %>% GGally::ggpairs(columns = c(9,35:39))
+```
+The number of borrowed E_bikes at Gare_Sud seems to be negatively correlated with radiation (-0,139***) but positively correlated with the others.
+
+### TSLM Model Bike
+Here is a forecast with TSLM() on Bike 
+```{r}
+fit.BikeTempPreLT.3 <- Gland_fin_tsibble %>% model(TSLM(Bike_Gare_Sud ~ trend() + season()))
+fc.BikeTempPreLT.3 <- forecast(fit.BikeTempPreLT.3, h=144)
+fc.BikeTempPreLT.3 %>% autoplot(Gland_fin_tsibble) + xlab("Date") + ylab("Bike_Gare_Sud")
+
+fit.BikeTempPreLT.3 %>% gg_tsresiduals()
+```
+
+### TSLM Model E-Bike
+Here is a forecast with TSLM() on EBike 
+```{r}
+fit.EBikeTempPreLT.3 <- Gland_fin_tsibble %>% model(TSLM(Ebike_Gare_Sud ~ trend() + season()))
+fc.EBikeTempPreLT.3 <- forecast(fit.EBikeTempPreLT.3, h=144)
+fc.EBikeTempPreLT.3 %>% autoplot(Gland_fin_tsibble) + xlab("Date") + ylab("E_Bike_Gare_Sud")
+
+fit.EBikeTempPreLT.3 %>% gg_tsresiduals()
+```
+
+### ARIMA model on Bike and Ebike 
+```{r}
+fitLT3 <- Gland_fin_tsibble %>%  model(ARIMA(Bike_Gare_Sud))
+report(fitLT3)
+fitLT3 %>% forecast(h = 144) %>% autoplot(Gland_fin_tsibble)
+
+fit.LT3 <- Gland_fin_tsibble %>%  model(ARIMA(Ebike_Gare_Sud))
+report(fit.LT3)
+fit.LT3 %>% forecast(h = 144) %>% autoplot(Gland_fin_tsibble)
+```
+
+### Dynamic regression with temperature Bike 
+```{r}
+Gland_fin_tsibble %>% gather("var", "value", Bike_Gare_Sud, temp) %>%
+ggplot(aes(x = Date, y = value)) + geom_line() +
+facet_grid(vars(var), scales = "free_y") +
+labs(y = "", title = "Number of bikes borrowed every 10 minutes in Gland Gare Sud")
+
+fitDR_LT3 <- Gland_fin_tsibble %>% model(ARIMA(Bike_Gare_Sud ~ temp))
+report(fitDR_LT3)
+
+bind_rows( 'Regression Errors' = as_tibble(residuals(fitDR_LT3, type = "regression")), 'ARIMA Errors' = as_tibble(residuals(fitDR_LT3, type = "innovation")), .id = "type") %>%
+ggplot(aes(x = Date, y = .resid)) + geom_line() + facet_grid(vars(type), scales = "free_y") + labs(y = "")
+
+fitDR_LT3 %>% gg_tsresiduals()
+
+future_Gland_fin_tsibble3 <- new_data(Gland_fin_tsibble, 144) %>% mutate(temp = mean(Gland_fin_tsibble$temp)) 
+forecast(fitDR_LT3, new_data = future_Gland_fin_tsibble3, h = 144) %>% autoplot(Gland_fin_tsibble) +
+labs(y = "Forecast of the number of bikes borrowed every 10 minutes in Gland Gare Sud") 
+```
+
+### Dynamic regression with temperature E-Bike 
+```{r}
+Gland_fin_tsibble %>% gather("var", "value", Ebike_Gare_Sud, temp) %>%
+ggplot(aes(x = Date, y = value)) + geom_line() +
+facet_grid(vars(var), scales = "free_y") +
+labs(y = "", title = "Number of Ebikes borrowed every 10 minutes in Gland Gare Sud")
+
+fitDR_eLT3 <- Gland_fin_tsibble %>% model(ARIMA(Ebike_Gare_Sud ~ temp))
+report(fitDR_eLT3)
+
+bind_rows( 'Regression Errors' = as_tibble(residuals(fitDR_eLT3, type = "regression")), 'ARIMA Errors' = as_tibble(residuals(fitDR_eLT3, type = "innovation")), .id = "type") %>%
+ggplot(aes(x = Date, y = .resid)) + geom_line() + facet_grid(vars(type), scales = "free_y") + labs(y = "")
+
+fitDR_eLT3 %>% gg_tsresiduals()
+
+future_Gland_fin_tsibble.3 <- new_data(Gland_fin_tsibble, 144) %>% mutate(temp = mean(Gland_fin_tsibble$temp)) 
+forecast(fitDR_eLT3, new_data = future_Gland_fin_tsibble.3, h = 144) %>% autoplot(Gland_fin_tsibble) +
+labs(y = "Forecast of the number of Ebikes borrowed every 10 minutes in Gland Gare Sud") 
+```
+
+
+------------------------------------------------------------------------------------------------------------------------------
 # 4. Gland UICN
 
+### 3.1 STL Decomposition Bike
+```{r}
+#ETS Decomposition Bike data 
+dcmp <- Gland_fin_tsibble %>% model(STL(Bike_UICN))
+components(dcmp) %>% autoplot() + xlab("Date")
+```
+
+### ETS Model Bike
+```{r}
+#ETS forecast
+fit4 <- Gland_fin_tsibble %>%
+model(ETS(Bike_UICN ~ error("A") + trend("N") + season("N"), opt_crit = "mse"))
+coefficients(fit4)
+```
+
+According to the fit, we should set alpha = 0.95.
+```{r}
+FIT4 <- Gland_fin_tsibble %>%
+model(ETS(Bike_UICN ~ error("A") + trend("N", alpha=0.95) + season("N")))
+FIT4 %>% forecast(h = 144) %>% autoplot(Gland_fin_tsibble) +
+theme(legend.position = "none")
+FIT4%>%accuracy()
+```
+RMSE = 0.268
+
+### Mean/Naive/S_Naive Model Bike
+```{r}
+mean_model4 <- Gland_fin_tsibble %>% model( Mean = MEAN(Bike_UICN),
+Naive = NAIVE(Bike_UICN),
+S_Naive = SNAIVE(Bike_UICN))
+
+forecast_mean_model4 <- mean_model4 %>% forecast(h = 144) 
+forecast_mean_model4 %>% autoplot(Gland_fin_tsibble, level = NULL) + guides(colour=guide_legend(title = "Forecast"))
+```
+
+### STL decomposition E-Bike
+```{r}
+#STL Decomposition Bike data 
+dcmp <- Gland_fin_tsibble %>% model(STL(Ebike_UICN))
+components(dcmp) %>% autoplot() + xlab("Date")
+```
+
+### ETS Model E-Bike
+```{r}
+#ETS forecast
+fit.4 <- Gland_fin_tsibble %>%
+model(ETS(Ebike_UICN ~ error("A") + trend("N") + season("N"), opt_crit = "mse"))
+coefficients(fit.4)
+```
+
+According to the fit, we should set alpha = 0.98.
+```{r}
+FIT.4 <- Gland_fin_tsibble %>%
+model(ETS(Ebike_UICN ~ error("A") + trend("N", alpha=0.98) + season("N")))
+FIT.4 %>% forecast(h = 144) %>% autoplot(Gland_fin_tsibble) +
+theme(legend.position = "none")
+FIT.4%>%accuracy()
+```
+RMSE = 0.311
+
+### Mean/Naive/S_Naive Model E-Bike
+```{r}
+mean_model.4 <- Gland_fin_tsibble %>% model( Mean = MEAN(Ebike_UICN),
+Naive = NAIVE(Ebike_UICN),
+S_Naive = SNAIVE(Ebike_UICN))
+
+forecast_mean_model.4 <- mean_model.4 %>% forecast(h = 144) 
+forecast_mean_model.4 %>% autoplot(Gland_fin_tsibble, level = NULL) + guides(colour=guide_legend(title = "Forecast"))
+```
+
+### Multiple linear regression Model Bike
+We now fit a multiple linear regression of Bikes with temperatures and precipitations. 
+```{r}
+fit.BikeTempPreLT4 <- Gland_fin_tsibble %>%
+model(tslm = TSLM(Bike_UICN ~ temp + prec + ensoll + vent + press))
+report(fit.BikeTempPreLT4)
+```
+The R squares is low (0,0503) but radiation and temperature seem to be positively correlated and pression and wind negatively correlated. which is consistent.  
+
+### Multiple linear regression Model Bike
+```{r}
+fit.EBikeTempPreLT.4 <- Gland_fin_tsibble %>%
+model(tslm = TSLM(Ebike_UICN ~ temp + prec + ensoll + vent + press))
+report(fit.EBikeTempPreLT.4)
+```
+Here, for E_Bikes all the results seem to be correlated but the R-squared is significantly low. 
+
+Let's see the correlation between these weather variables and Bikes at Gare_Sud
+```{r}
+Gland_fin_tsibble %>% GGally::ggpairs(columns = c(32,35:39))
+```
+The number of borrowed bikes at UICN seems negatively correlated with wind (-0,126***) and positively with radiation (0,106***)
+
+Let's see the correlation between these weather variables and E_Bikes at UICN.
+```{r}
+Gland_fin_tsibble %>% GGally::ggpairs(columns = c(33,35:39))
+```
+The number of borrowed E_bikes at UICN seems also positively correlated with radiation (0.141***).
+
+### TSLM Model Bike
+Here is a forecast with TSLM() on Bike 
+```{r}
+fit.BikeTempPreLT.4 <- Gland_fin_tsibble %>% model(TSLM(Bike_UICN ~ trend() + season()))
+fc.BikeTempPreLT.4 <- forecast(fit.BikeTempPreLT.4, h=144)
+fc.BikeTempPreLT.4 %>% autoplot(Gland_fin_tsibble) + xlab("Date") + ylab("Bike_UICN")
+
+fit.BikeTempPreLT.4 %>% gg_tsresiduals()
+```
+
+### TSLM Model E-Bike
+Here is a forecast with TSLM() on EBike 
+```{r}
+fit.EBikeTempPreLT.4 <- Gland_fin_tsibble %>% model(TSLM(Ebike_UICN ~ trend() + season()))
+fc.EBikeTempPreLT.4 <- forecast(fit.EBikeTempPreLT.4, h=144)
+fc.EBikeTempPreLT.4 %>% autoplot(Gland_fin_tsibble) + xlab("Date") + ylab("E_UICN")
+
+fit.EBikeTempPreLT.4 %>% gg_tsresiduals()
+```
+
+### ARIMA model on Bike and Ebike 
+```{r}
+fitLT4 <- Gland_fin_tsibble %>%  model(ARIMA(Bike_UICN))
+report(fitLT4)
+fitLT4 %>% forecast(h = 144) %>% autoplot(Gland_fin_tsibble)
+
+fit.LT4 <- Gland_fin_tsibble %>%  model(ARIMA(Ebike_UICN))
+report(fit.LT4)
+fit.LT4 %>% forecast(h = 144) %>% autoplot(Gland_fin_tsibble)
+```
+
+### Dynamic regression with temperature Bike 
+```{r}
+Gland_fin_tsibble %>% gather("var", "value", Bike_UICN, temp) %>%
+ggplot(aes(x = Date, y = value)) + geom_line() +
+facet_grid(vars(var), scales = "free_y") +
+labs(y = "", title = "Number of bikes borrowed every 10 minutes in Gland UICN")
+
+fitDR_LT4 <- Gland_fin_tsibble %>% model(ARIMA(Bike_UICN ~ temp))
+report(fitDR_LT4)
+
+bind_rows( 'Regression Errors' = as_tibble(residuals(fitDR_LT4, type = "regression")), 'ARIMA Errors' = as_tibble(residuals(fitDR_LT4, type = "innovation")), .id = "type") %>%
+ggplot(aes(x = Date, y = .resid)) + geom_line() + facet_grid(vars(type), scales = "free_y") + labs(y = "")
+
+fitDR_LT4 %>% gg_tsresiduals()
+
+future_Gland_fin_tsibble4 <- new_data(Gland_fin_tsibble, 144) %>% mutate(temp = mean(Gland_fin_tsibble$temp)) 
+forecast(fitDR_LT4, new_data = future_Gland_fin_tsibble4, h = 144) %>% autoplot(Gland_fin_tsibble) +
+labs(y = "Forecast of the number of bikes borrowed every 10 minutes in Gland UICN") 
+```
+
+### Dynamic regression with temperature E-Bike 
+```{r}
+Gland_fin_tsibble %>% gather("var", "value", Ebike_UICN, temp) %>%
+ggplot(aes(x = Date, y = value)) + geom_line() +
+facet_grid(vars(var), scales = "free_y") +
+labs(y = "", title = "Number of Ebikes borrowed every 10 minutes in Gland UICN")
+
+fitDR_eLT4 <- Gland_fin_tsibble %>% model(ARIMA(Ebike_UICN ~ temp))
+report(fitDR_eLT4)
+
+bind_rows( 'Regression Errors' = as_tibble(residuals(fitDR_eLT4, type = "regression")), 'ARIMA Errors' = as_tibble(residuals(fitDR_eLT4, type = "innovation")), .id = "type") %>%
+ggplot(aes(x = Date, y = .resid)) + geom_line() + facet_grid(vars(type), scales = "free_y") + labs(y = "")
+
+fitDR_eLT4 %>% gg_tsresiduals()
+
+future_Gland_fin_tsibble.4 <- new_data(Gland_fin_tsibble, 144) %>% mutate(temp = mean(Gland_fin_tsibble$temp)) 
+forecast(fitDR_eLT4, new_data = future_Gland_fin_tsibble.4, h = 144) %>% autoplot(Gland_fin_tsibble) +
+labs(y = "Forecast of the number of Ebikes borrowed every 10 minutes in Gland UICN") 
+```
+
+------------------------------------------------------------------------------------------------------------------------------
 # 5. Gland Montoly
 
+### STL Decomposition Bike
+```{r}
+#ETS Decomposition Bike data 
+dcmp <- Gland_fin_tsibble %>% model(STL(Bike_Montoly))
+components(dcmp) %>% autoplot() + xlab("Date")
+```
+
+### ETS Model Bike
+```{r}
+#ETS forecast
+fit5 <- Gland_fin_tsibble %>%
+model(ETS(Bike_Montoly ~ error("A") + trend("N") + season("N"), opt_crit = "mse"))
+coefficients(fit5)
+```
+
+According to the fit, we should set alpha = 0.87.
+```{r}
+FIT5 <- Gland_fin_tsibble %>%
+model(ETS(Bike_Montoly ~ error("A") + trend("N", alpha=0.87) + season("N")))
+FIT5 %>% forecast(h = 144) %>% autoplot(Gland_fin_tsibble) +
+theme(legend.position = "none")
+FIT5%>%accuracy()
+```
+RMSE = 0.133
+
+### Mean/Naive/S_Naive Model Bike
+```{r}
+mean_model5 <- Gland_fin_tsibble %>% model( Mean = MEAN(Bike_Montoly),
+Naive = NAIVE(Bike_Montoly),
+S_Naive = SNAIVE(Bike_Montoly))
+
+forecast_mean_model5 <- mean_model5 %>% forecast(h = 144) 
+forecast_mean_model5 %>% autoplot(Gland_fin_tsibble, level = NULL) + guides(colour=guide_legend(title = "Forecast"))
+```
+
+### STL decomposition E-Bike
+```{r}
+#STL Decomposition Bike data 
+dcmp <- Gland_fin_tsibble %>% model(STL(Ebike_Montoly))
+components(dcmp) %>% autoplot() + xlab("Date")
+```
+
+### ETS Model E-Bike
+```{r}
+#ETS forecast
+fit.5 <- Gland_fin_tsibble %>%
+model(ETS(Ebike_Montoly ~ error("A") + trend("N") + season("N"), opt_crit = "mse"))
+coefficients(fit.5)
+```
+
+According to the fit, we should set alpha = 0.96.
+```{r}
+FIT.5 <- Gland_fin_tsibble %>%
+model(ETS(Ebike_Montoly ~ error("A") + trend("N", alpha=0.96) + season("N")))
+FIT.5 %>% forecast(h = 144) %>% autoplot(Gland_fin_tsibble) +
+theme(legend.position = "none")
+FIT.5%>%accuracy()
+```
+RMSE = 0.202
+
+### Mean/Naive/S_Naive Model E-Bike
+```{r}
+mean_model.5 <- Gland_fin_tsibble %>% model( Mean = MEAN(Ebike_Montoly),
+Naive = NAIVE(Ebike_Montoly),
+S_Naive = SNAIVE(Ebike_Montoly))
+
+forecast_mean_model.5 <- mean_model.5 %>% forecast(h = 144) 
+forecast_mean_model.5 %>% autoplot(Gland_fin_tsibble, level = NULL) + guides(colour=guide_legend(title = "Forecast"))
+```
+
+### Multiple linear regression Model Bike
+We now fit a multiple linear regression of Bikes with temperatures and precipitations. 
+```{r}
+fit.BikeTempPreLT5 <- Gland_fin_tsibble %>%
+model(tslm = TSLM(Bike_Montoly ~ temp + prec + ensoll + vent + press))
+report(fit.BikeTempPreLT5)
+```
+The R squares is low (0,194) but all the variables seem to be correlated.   
+
+### Multiple linear regression Model Bike
+```{r}
+fit.EBikeTempPreLT.5 <- Gland_fin_tsibble %>%
+model(tslm = TSLM(Ebike_Montoly ~ temp + prec + ensoll + vent + press))
+report(fit.EBikeTempPreLT.5)
+```
+Here, for E_Bikes the temperature is positively correlated and pression and precipitation negatively correlated but the R-squared is still significantly low. 
+
+Let's see the correlation between these weather variables and Bikes at Montoly
+```{r}
+Gland_fin_tsibble %>% GGally::ggpairs(columns = c(26,35:39))
+```
+The number of borrowed bikes at Montoly seems negatively correlated with temperature (-0,394***).
+
+Let's see the correlation between these weather variables and E_Bikes at Montoly.
+```{r}
+Gland_fin_tsibble %>% GGally::ggpairs(columns = c(27,35:39))
+```
+But the number of borrowed E_bikes at Montoly seems correlated with temperature (0.307***).
+
+### TSLM Model Bike
+Here is a forecast with TSLM() on Bike 
+```{r}
+fit.BikeTempPreLT.5 <- Gland_fin_tsibble %>% model(TSLM(Bike_Montoly ~ trend() + season()))
+fc.BikeTempPreLT.5 <- forecast(fit.BikeTempPreLT.5, h=144)
+fc.BikeTempPreLT.5 %>% autoplot(Gland_fin_tsibble) + xlab("Date") + ylab("Bike_Montoly")
+
+fit.BikeTempPreLT.5 %>% gg_tsresiduals()
+```
+
+### TSLM Model E-Bike
+Here is a forecast with TSLM() on EBike 
+```{r}
+fit.EBikeTempPreLT.5 <- Gland_fin_tsibble %>% model(TSLM(Ebike_Montoly ~ trend() + season()))
+fc.EBikeTempPreLT.5 <- forecast(fit.EBikeTempPreLT.5, h=144)
+fc.EBikeTempPreLT.5 %>% autoplot(Gland_fin_tsibble) + xlab("Date") + ylab("E_Montoly")
+
+fit.EBikeTempPreLT.5 %>% gg_tsresiduals()
+```
+
+### ARIMA model on Bike and Ebike 
+```{r}
+fitLT5 <- Gland_fin_tsibble %>%  model(ARIMA(Bike_Montoly))
+report(fitLT5)
+fitLT5 %>% forecast(h = 144) %>% autoplot(Gland_fin_tsibble)
+
+fit.LT5 <- Gland_fin_tsibble %>%  model(ARIMA(Ebike_Montoly))
+report(fit.LT5)
+fit.LT5 %>% forecast(h = 144) %>% autoplot(Gland_fin_tsibble)
+```
+
+### Dynamic regression with temperature Bike 
+```{r}
+Gland_fin_tsibble %>% gather("var", "value", Bike_Montoly, temp) %>%
+ggplot(aes(x = Date, y = value)) + geom_line() +
+facet_grid(vars(var), scales = "free_y") +
+labs(y = "", title = "Number of bikes borrowed every 10 minutes in Gland Montoly")
+
+fitDR_LT5 <- Gland_fin_tsibble %>% model(ARIMA(Bike_Montoly ~ temp))
+report(fitDR_LT5)
+
+bind_rows( 'Regression Errors' = as_tibble(residuals(fitDR_LT5, type = "regression")), 'ARIMA Errors' = as_tibble(residuals(fitDR_LT5, type = "innovation")), .id = "type") %>%
+ggplot(aes(x = Date, y = .resid)) + geom_line() + facet_grid(vars(type), scales = "free_y") + labs(y = "")
+
+fitDR_LT5 %>% gg_tsresiduals()
+
+future_Gland_fin_tsibble5 <- new_data(Gland_fin_tsibble, 144) %>% mutate(temp = mean(Gland_fin_tsibble$temp)) 
+forecast(fitDR_LT5, new_data = future_Gland_fin_tsibble5, h = 144) %>% autoplot(Gland_fin_tsibble) +
+labs(y = "Forecast of the number of bikes borrowed every 10 minutes in Gland Montoly") 
+```
+
+### Dynamic regression with temperature E-Bike 
+```{r}
+Gland_fin_tsibble %>% gather("var", "value", Ebike_Montoly, temp) %>%
+ggplot(aes(x = Date, y = value)) + geom_line() +
+facet_grid(vars(var), scales = "free_y") +
+labs(y = "", title = "Number of Ebikes borrowed every 10 minutes in Gland Montoly")
+
+fitDR_eLT5 <- Gland_fin_tsibble %>% model(ARIMA(Ebike_Montoly ~ temp))
+report(fitDR_eLT5)
+
+bind_rows( 'Regression Errors' = as_tibble(residuals(fitDR_eLT5, type = "regression")), 'ARIMA Errors' = as_tibble(residuals(fitDR_eLT5, type = "innovation")), .id = "type") %>%
+ggplot(aes(x = Date, y = .resid)) + geom_line() + facet_grid(vars(type), scales = "free_y") + labs(y = "")
+
+fitDR_eLT5 %>% gg_tsresiduals()
+
+future_Gland_fin_tsibble.5 <- new_data(Gland_fin_tsibble, 144) %>% mutate(temp = mean(Gland_fin_tsibble$temp)) 
+forecast(fitDR_eLT5, new_data = future_Gland_fin_tsibble.5, h = 144) %>% autoplot(Gland_fin_tsibble) +
+labs(y = "Forecast of the number of Ebikes borrowed every 10 minutes in Gland Montoly") 
+```
+
+------------------------------------------------------------------------------------------------------------------------------
 # 6. Gland Grande Rue
 
+### STL Decomposition Bike
+```{r}
+#ETS Decomposition Bike data 
+dcmp <- Gland_fin_tsibble %>% model(STL(Bike_Grand_Rue))
+components(dcmp) %>% autoplot() + xlab("Date")
+```
 
+### ETS Model Bike
+```{r}
+#ETS forecast
+fit6 <- Gland_fin_tsibble %>%
+model(ETS(Bike_Grand_Rue ~ error("A") + trend("N") + season("N"), opt_crit = "mse"))
+coefficients(fit6)
+```
+
+According to the fit, we should set alpha = 0.96.
+```{r}
+FIT6 <- Gland_fin_tsibble %>%
+model(ETS(Bike_Grand_Rue ~ error("A") + trend("N", alpha=0.96) + season("N")))
+FIT6 %>% forecast(h = 144) %>% autoplot(Gland_fin_tsibble) +
+theme(legend.position = "none")
+FIT6%>%accuracy()
+```
+RMSE = 0.147
+
+### Mean/Naive/S_Naive Model Bike
+```{r}
+mean_model6 <- Gland_fin_tsibble %>% model( Mean = MEAN(Bike_Grand_Rue),
+Naive = NAIVE(Bike_Grand_Rue),
+S_Naive = SNAIVE(Bike_Grand_Rue))
+
+forecast_mean_model6 <- mean_model6 %>% forecast(h = 144) 
+forecast_mean_model6 %>% autoplot(Gland_fin_tsibble, level = NULL) + guides(colour=guide_legend(title = "Forecast"))
+```
+
+### STL decomposition E-Bike
+```{r}
+#STL Decomposition Bike data 
+dcmp <- Gland_fin_tsibble %>% model(STL(Ebike_Grand_Rue))
+components(dcmp) %>% autoplot() + xlab("Date")
+```
+
+### ETS Model E-Bike
+```{r}
+#ETS forecast
+fit.6 <- Gland_fin_tsibble %>%
+model(ETS(Ebike_Grand_Rue ~ error("A") + trend("N") + season("N"), opt_crit = "mse"))
+coefficients(fit.6)
+```
+
+According to the fit, we should set alpha = 1.
+```{r}
+FIT.6 <- Gland_fin_tsibble %>%
+model(ETS(Ebike_Grand_Rue ~ error("A") + trend("N", alpha=1) + season("N")))
+FIT.6 %>% forecast(h = 144) %>% autoplot(Gland_fin_tsibble) +
+theme(legend.position = "none")
+FIT.6%>%accuracy()
+```
+RMSE = NaN
+
+### Mean/Naive/S_Naive Model E-Bike
+```{r}
+mean_model.6 <- Gland_fin_tsibble %>% model( Mean = MEAN(Ebike_Grand_Rue),
+Naive = NAIVE(Ebike_Grand_Rue),
+S_Naive = SNAIVE(Ebike_Grand_Rue))
+
+forecast_mean_model.6 <- mean_model.6 %>% forecast(h = 144) 
+forecast_mean_model.6 %>% autoplot(Gland_fin_tsibble, level = NULL) + guides(colour=guide_legend(title = "Forecast"))
+```
+
+### Multiple linear regression Model Bike
+We now fit a multiple linear regression of Bikes with temperatures and precipitations. 
+```{r}
+fit.BikeTempPreLT6 <- Gland_fin_tsibble %>%
+model(tslm = TSLM(Bike_Grand_Rue ~ temp + prec + ensoll + vent + press))
+report(fit.BikeTempPreLT6)
+```
+The R squares is low (0,298) but all the variables seem to be correlated.   
+
+### Multiple linear regression Model Bike
+```{r}
+fit.EBikeTempPreLT.6 <- Gland_fin_tsibble %>%
+model(tslm = TSLM(Ebike_Grand_Rue ~ temp + prec + ensoll + vent + press))
+report(fit.EBikeTempPreLT.6)
+```
+Here, for E_Bikes the temperature, pression and radiation are negatively correlated.
+
+Let's see the correlation between these weather variables and Bikes at Grand_Rue
+```{r}
+Gland_fin_tsibble %>% GGally::ggpairs(columns = c(11,35:39))
+```
+The number of borrowed bikes at Grand_Rue seems positively correlated with temperature (-0,527***).
+
+Let's see the correlation between these weather variables and E_Bikes at Grand_Rue
+```{r}
+Gland_fin_tsibble %>% GGally::ggpairs(columns = c(12,35:39))
+```
+But the number of borrowed E_bikes at Grand_Rue seems negatively correlated with radiation (-0.271***).
+
+### TSLM Model Bike
+Here is a forecast with TSLM() on Bike 
+```{r}
+fit.BikeTempPreLT.6 <- Gland_fin_tsibble %>% model(TSLM(Bike_Grand_Rue ~ trend() + season()))
+fc.BikeTempPreLT.6 <- forecast(fit.BikeTempPreLT.6, h=144)
+fc.BikeTempPreLT.6 %>% autoplot(Gland_fin_tsibble) + xlab("Date") + ylab("Bike_Grand_Rue")
+
+fit.BikeTempPreLT.6 %>% gg_tsresiduals()
+```
+
+### TSLM Model E-Bike
+Here is a forecast with TSLM() on EBike 
+```{r}
+fit.EBikeTempPreLT.6 <- Gland_fin_tsibble %>% model(TSLM(Ebike_Grand_Rue~ trend() + season()))
+fc.EBikeTempPreLT.6 <- forecast(fit.EBikeTempPreLT.6, h=144)
+fc.EBikeTempPreLT.6 %>% autoplot(Gland_fin_tsibble) + xlab("Date") + ylab("E_Montoly")
+
+fit.EBikeTempPreLT.6 %>% gg_tsresiduals()
+```
+
+### ARIMA model on Bike and Ebike 
+```{r}
+fitLT6 <- Gland_fin_tsibble %>%  model(ARIMA(Bike_Grand_Rue))
+report(fitLT6)
+fitLT6 %>% forecast(h = 144) %>% autoplot(Gland_fin_tsibble)
+
+fit.LT6 <- Gland_fin_tsibble %>%  model(ARIMA(Ebike_Grand_Rue))
+report(fit.LT6)
+fit.LT6 %>% forecast(h = 144) %>% autoplot(Gland_fin_tsibble)
+```
+
+### Dynamic regression with temperature Bike 
+```{r}
+Gland_fin_tsibble %>% gather("var", "value", Bike_Grand_Rue, temp) %>%
+ggplot(aes(x = Date, y = value)) + geom_line() +
+facet_grid(vars(var), scales = "free_y") +
+labs(y = "", title = "Number of bikes borrowed every 10 minutes in Gland Grand_Rue")
+
+fitDR_LT6 <- Gland_fin_tsibble %>% model(ARIMA(Bike_Grand_Rue ~ temp))
+report(fitDR_LT6)
+
+bind_rows( 'Regression Errors' = as_tibble(residuals(fitDR_LT6, type = "regression")), 'ARIMA Errors' = as_tibble(residuals(fitDR_LT6, type = "innovation")), .id = "type") %>%
+ggplot(aes(x = Date, y = .resid)) + geom_line() + facet_grid(vars(type), scales = "free_y") + labs(y = "")
+
+fitDR_LT6 %>% gg_tsresiduals()
+
+future_Gland_fin_tsibble6 <- new_data(Gland_fin_tsibble, 144) %>% mutate(temp = mean(Gland_fin_tsibble$temp)) 
+forecast(fitDR_LT6, new_data = future_Gland_fin_tsibble6, h = 144) %>% autoplot(Gland_fin_tsibble) +
+labs(y = "Forecast of the number of bikes borrowed every 10 minutes in Gland Grand_Rue") 
+```
+
+### Dynamic regression with temperature E-Bike 
+```{r}
+Gland_fin_tsibble %>% gather("var", "value", Ebike_Grand_Rue, temp) %>%
+ggplot(aes(x = Date, y = value)) + geom_line() +
+facet_grid(vars(var), scales = "free_y") +
+labs(y = "", title = "Number of Ebikes borrowed every 10 minutes in Gland Grand_Rue")
+
+fitDR_eLT6 <- Gland_fin_tsibble %>% model(ARIMA(Ebike_Grand_Rue ~ temp))
+report(fitDR_eLT6)
+
+bind_rows( 'Regression Errors' = as_tibble(residuals(fitDR_eLT6, type = "regression")), 'ARIMA Errors' = as_tibble(residuals(fitDR_eLT6, type = "innovation")), .id = "type") %>%
+ggplot(aes(x = Date, y = .resid)) + geom_line() + facet_grid(vars(type), scales = "free_y") + labs(y = "")
+
+fitDR_eLT6 %>% gg_tsresiduals()
+
+future_Gland_fin_tsibble.6 <- new_data(Gland_fin_tsibble, 144) %>% mutate(temp = mean(Gland_fin_tsibble$temp)) 
+forecast(fitDR_eLT6, new_data = future_Gland_fin_tsibble.6, h = 144) %>% autoplot(Gland_fin_tsibble) +
+labs(y = "Forecast of the number of Ebikes borrowed every 10 minutes in Gland Grand_Rue") 
+```
+
+------------------------------------------------------------------------------------------------------------------------------
 # 7. Gland La Falaise
 
+### STL Decomposition Bike
+```{r}
+#ETS Decomposition Bike data 
+dcmp <- Gland_fin_tsibble %>% model(STL(Bike_La_Falaise))
+components(dcmp) %>% autoplot() + xlab("Date")
+```
 
+### ETS Model Bike
+```{r}
+#ETS forecast
+fit7 <- Gland_fin_tsibble %>%
+model(ETS(Bike_La_Falaise ~ error("A") + trend("N") + season("N"), opt_crit = "mse"))
+coefficients(fit7)
+```
+
+According to the fit, we should set alpha = 0.91.
+```{r}
+FIT7 <- Gland_fin_tsibble %>%
+model(ETS(Bike_La_Falaise ~ error("A") + trend("N", alpha=0.91) + season("N")))
+FIT7 %>% forecast(h = 144) %>% autoplot(Gland_fin_tsibble) +
+theme(legend.position = "none")
+FIT7%>%accuracy()
+```
+RMSE = 0.162
+
+### Mean/Naive/S_Naive Model Bike
+```{r}
+mean_model7 <- Gland_fin_tsibble %>% model( Mean = MEAN(Bike_La_Falaise),
+Naive = NAIVE(Bike_La_Falaise),
+S_Naive = SNAIVE(Bike_La_Falaise))
+
+forecast_mean_model7 <- mean_model7 %>% forecast(h = 144) 
+forecast_mean_model7 %>% autoplot(Gland_fin_tsibble, level = NULL) + guides(colour=guide_legend(title = "Forecast"))
+```
+
+### STL decomposition E-Bike
+```{r}
+#STL Decomposition Bike data 
+dcmp <- Gland_fin_tsibble %>% model(STL(Ebike_La_Falaise))
+components(dcmp) %>% autoplot() + xlab("Date")
+```
+
+### ETS Model E-Bike
+```{r}
+#ETS forecast
+fit.7 <- Gland_fin_tsibble %>%
+model(ETS(Ebike_La_Falaise ~ error("A") + trend("N") + season("N"), opt_crit = "mse"))
+coefficients(fit.7)
+```
+
+According to the fit, we should set alpha = 0.98.
+```{r}
+FIT.7 <- Gland_fin_tsibble %>%
+model(ETS(Ebike_La_Falaise ~ error("A") + trend("N", alpha=0.98) + season("N")))
+FIT.7 %>% forecast(h = 144) %>% autoplot(Gland_fin_tsibble) +
+theme(legend.position = "none")
+FIT.7%>%accuracy()
+```
+RMSE = 0.174
+
+### Mean/Naive/S_Naive Model E-Bike
+```{r}
+mean_model.7 <- Gland_fin_tsibble %>% model( Mean = MEAN(Ebike_La_Falaise),
+Naive = NAIVE(Ebike_La_Falaise),
+S_Naive = SNAIVE(Ebike_La_Falaise))
+
+forecast_mean_model.7 <- mean_model.7 %>% forecast(h = 144) 
+forecast_mean_model.7 %>% autoplot(Gland_fin_tsibble, level = NULL) + guides(colour=guide_legend(title = "Forecast"))
+```
+
+### Multiple linear regression Model Bike
+We now fit a multiple linear regression of Bikes with temperatures and precipitations. 
+```{r}
+fit.BikeTempPreLT7 <- Gland_fin_tsibble %>%
+model(tslm = TSLM(Bike_La_Falaise ~ temp + prec + ensoll + vent + press))
+report(fit.BikeTempPreLT7)
+```
+The R squares is low (0,103).   
+
+### Multiple linear regression Model Bike
+```{r}
+fit.EBikeTempPreLT.7 <- Gland_fin_tsibble %>%
+model(tslm = TSLM(Ebike_La_Falaise ~ temp + prec + ensoll + vent + press))
+report(fit.EBikeTempPreLT.7)
+```
+Here, for E_Bikes ...
+
+Let's see the correlation between these weather variables and Bikes at La_Falaise
+```{r}
+Gland_fin_tsibble %>% GGally::ggpairs(columns = c(17,35:39))
+```
+The number of borrowed bikes at La_Falaise seems positively correlated with pression (0.255***).
+
+Let's see the correlation between these weather variables and E_Bikes at La_Falaise
+```{r}
+Gland_fin_tsibble %>% GGally::ggpairs(columns = c(18,35:39))
+```
+But the number of borrowed E_bikes at La_Falaise seems negatively correlated with pression (-0.356***).
+
+### TSLM Model Bike
+Here is a forecast with TSLM() on Bike 
+```{r}
+fit.BikeTempPreLT.7 <- Gland_fin_tsibble %>% model(TSLM(Bike_La_Falaise ~ trend() + season()))
+fc.BikeTempPreLT.7 <- forecast(fit.BikeTempPreLT.7, h=144)
+fc.BikeTempPreLT.7 %>% autoplot(Gland_fin_tsibble) + xlab("Date") + ylab("Bike_La_Falaise")
+
+fit.BikeTempPreLT.7 %>% gg_tsresiduals()
+```
+
+### TSLM Model E-Bike
+Here is a forecast with TSLM() on EBike 
+```{r}
+fit.EBikeTempPreLT.7 <- Gland_fin_tsibble %>% model(TSLM(Ebike_La_Falaise ~ trend() + season()))
+fc.EBikeTempPreLT.7 <- forecast(fit.EBikeTempPreLT.7, h=144)
+fc.EBikeTempPreLT.7 %>% autoplot(Gland_fin_tsibble) + xlab("Date") + ylab("E_La_Falaise")
+
+fit.EBikeTempPreLT.7 %>% gg_tsresiduals()
+```
+
+### ARIMA model on Bike and Ebike 
+```{r}
+fitLT7 <- Gland_fin_tsibble %>%  model(ARIMA(Bike_La_Falaise))
+report(fitLT7)
+fitLT7 %>% forecast(h = 144) %>% autoplot(Gland_fin_tsibble)
+
+fit.LT7 <- Gland_fin_tsibble %>%  model(ARIMA(Ebike_La_Falaise))
+report(fit.LT7)
+fit.LT7 %>% forecast(h = 144) %>% autoplot(Gland_fin_tsibble)
+```
+
+### Dynamic regression with temperature Bike 
+```{r}
+Gland_fin_tsibble %>% gather("var", "value", Bike_La_Falaise, temp) %>%
+ggplot(aes(x = Date, y = value)) + geom_line() +
+facet_grid(vars(var), scales = "free_y") +
+labs(y = "", title = "Number of bikes borrowed every 10 minutes in Gland La_Falaise")
+
+fitDR_LT7 <- Gland_fin_tsibble %>% model(ARIMA(Bike_La_Falaise ~ temp))
+report(fitDR_LT7)
+
+bind_rows( 'Regression Errors' = as_tibble(residuals(fitDR_LT7, type = "regression")), 'ARIMA Errors' = as_tibble(residuals(fitDR_LT7, type = "innovation")), .id = "type") %>%
+ggplot(aes(x = Date, y = .resid)) + geom_line() + facet_grid(vars(type), scales = "free_y") + labs(y = "")
+
+fitDR_LT7 %>% gg_tsresiduals()
+
+future_Gland_fin_tsibble7 <- new_data(Gland_fin_tsibble, 144) %>% mutate(temp = mean(Gland_fin_tsibble$temp)) 
+forecast(fitDR_LT7, new_data = future_Gland_fin_tsibble7, h = 144) %>% autoplot(Gland_fin_tsibble) +
+labs(y = "Forecast of the number of bikes borrowed every 10 minutes in Gland La_Falaise") 
+```
+
+### Dynamic regression with temperature E-Bike 
+```{r}
+Gland_fin_tsibble %>% gather("var", "value", Ebike_La_Falaise, temp) %>%
+ggplot(aes(x = Date, y = value)) + geom_line() +
+facet_grid(vars(var), scales = "free_y") +
+labs(y = "", title = "Number of Ebikes borrowed every 10 minutes in Gland La_Falaise")
+
+fitDR_eLT7 <- Gland_fin_tsibble %>% model(ARIMA(Ebike_La_Falaise ~ temp))
+report(fitDR_eLT7)
+
+bind_rows( 'Regression Errors' = as_tibble(residuals(fitDR_eLT7, type = "regression")), 'ARIMA Errors' = as_tibble(residuals(fitDR_eLT7, type = "innovation")), .id = "type") %>%
+ggplot(aes(x = Date, y = .resid)) + geom_line() + facet_grid(vars(type), scales = "free_y") + labs(y = "")
+
+fitDR_eLT7 %>% gg_tsresiduals()
+
+future_Gland_fin_tsibble.7 <- new_data(Gland_fin_tsibble, 144) %>% mutate(temp = mean(Gland_fin_tsibble$temp)) 
+forecast(fitDR_eLT7, new_data = future_Gland_fin_tsibble.7, h = 144) %>% autoplot(Gland_fin_tsibble) +
+labs(y = "Forecast of the number of Ebikes borrowed every 10 minutes in Gland La_Falaise") 
+```
+
+------------------------------------------------------------------------------------------------------------------------------
 # 8. Gland La Liginière
 
+### STL Decomposition Bike
+```{r}
+#ETS Decomposition Bike data 
+dcmp <- Gland_fin_tsibble %>% model(STL(Bike_La_Lignière))
+components(dcmp) %>% autoplot() + xlab("Date")
+```
 
+### ETS Model Bike
+```{r}
+#ETS forecast
+fit8 <- Gland_fin_tsibble %>%
+model(ETS(Bike_La_Lignière ~ error("A") + trend("N") + season("N"), opt_crit = "mse"))
+coefficients(fit8)
+```
+
+According to the fit, we should set alpha = 0.94.
+```{r}
+FIT8 <- Gland_fin_tsibble %>%
+model(ETS(Bike_La_Lignière ~ error("A") + trend("N", alpha=0.94) + season("N")))
+FIT8 %>% forecast(h = 144) %>% autoplot(Gland_fin_tsibble) +
+theme(legend.position = "none")
+FIT8%>%accuracy()
+```
+RMSE = 0.255
+
+### Mean/Naive/S_Naive Model Bike
+```{r}
+mean_model8 <- Gland_fin_tsibble %>% model( Mean = MEAN(Bike_La_Lignière),
+Naive = NAIVE(Bike_La_Lignière),
+S_Naive = SNAIVE(Bike_La_Lignière))
+
+forecast_mean_model8 <- mean_model8 %>% forecast(h = 144) 
+forecast_mean_model8 %>% autoplot(Gland_fin_tsibble, level = NULL) + guides(colour=guide_legend(title = "Forecast"))
+```
+
+### STL decomposition E-Bike
+```{r}
+#STL Decomposition Bike data 
+dcmp <- Gland_fin_tsibble %>% model(STL(Ebike_La_Lignière))
+components(dcmp) %>% autoplot() + xlab("Date")
+```
+
+### ETS Model E-Bike
+```{r}
+#ETS forecast
+fit.8 <- Gland_fin_tsibble %>%
+model(ETS(Ebike_La_Lignière ~ error("A") + trend("N") + season("N"), opt_crit = "mse"))
+coefficients(fit.8)
+```
+
+According to the fit, we should set alpha = 0.96.
+```{r}
+FIT.8 <- Gland_fin_tsibble %>%
+model(ETS(Ebike_La_Lignière ~ error("A") + trend("N", alpha=0.96) + season("N")))
+FIT.8 %>% forecast(h = 144) %>% autoplot(Gland_fin_tsibble) +
+theme(legend.position = "none")
+FIT.8%>%accuracy()
+```
+RMSE = 0.28
+
+### Mean/Naive/S_Naive Model E-Bike
+```{r}
+mean_model.8 <- Gland_fin_tsibble %>% model( Mean = MEAN(Ebike_La_Lignière),
+Naive = NAIVE(Ebike_La_Lignière),
+S_Naive = SNAIVE(Ebike_La_Lignière))
+
+forecast_mean_model.8 <- mean_model.8 %>% forecast(h = 144) 
+forecast_mean_model.8 %>% autoplot(Gland_fin_tsibble, level = NULL) + guides(colour=guide_legend(title = "Forecast"))
+```
+
+### Multiple linear regression Model Bike
+We now fit a multiple linear regression of Bikes with temperatures and precipitations. 
+```{r}
+fit.BikeTempPreLT8 <- Gland_fin_tsibble %>%
+model(tslm = TSLM(Bike_La_Lignière ~ temp + prec + ensoll + vent + press))
+report(fit.BikeTempPreLT8)
+```
+The R squares is low (0,133) and all the variables are positively correlated.   
+
+### Multiple linear regression Model Bike
+```{r}
+fit.EBikeTempPreLT.8 <- Gland_fin_tsibble %>%
+model(tslm = TSLM(Ebike_La_Lignière ~ temp + prec + ensoll + vent + press))
+report(fit.EBikeTempPreLT.8)
+```
+Here, for E_Bikes ...
+
+Let's see the correlation between these weather variables and Bikes at La_Lignière
+```{r}
+Gland_fin_tsibble %>% GGally::ggpairs(columns = c(20,35:39))
+```
+The number of borrowed bikes at La_Lignière seems positively correlated with pression (0.223***) and radiation (0.246***).
+
+Let's see the correlation between these weather variables and E_Bikes at La_Lignière
+```{r}
+Gland_fin_tsibble %>% GGally::ggpairs(columns = c(21,35:39))
+```
+The number of borrowed E_bikes at La_Lignière seems also positively correlated with radiation (0.242***).
+
+### TSLM Model Bike
+Here is a forecast with TSLM() on Bike 
+```{r}
+fit.BikeTempPreLT.8 <- Gland_fin_tsibble %>% model(TSLM(Bike_La_Lignière ~ trend() + season()))
+fc.BikeTempPreLT.8 <- forecast(fit.BikeTempPreLT.8, h=144)
+fc.BikeTempPreLT.8 %>% autoplot(Gland_fin_tsibble) + xlab("Date") + ylab("Bike_La_Lignière")
+
+fit.BikeTempPreLT.8 %>% gg_tsresiduals()
+```
+
+### TSLM Model E-Bike
+Here is a forecast with TSLM() on EBike 
+```{r}
+fit.EBikeTempPreLT.8 <- Gland_fin_tsibble %>% model(TSLM(Ebike_La_Lignière ~ trend() + season()))
+fc.EBikeTempPreLT.8 <- forecast(fit.EBikeTempPreLT.8, h=144)
+fc.EBikeTempPreLT.8 %>% autoplot(Gland_fin_tsibble) + xlab("Date") + ylab("E_La_Lignière")
+
+fit.EBikeTempPreLT.8 %>% gg_tsresiduals()
+```
+
+### ARIMA model on Bike and Ebike 
+```{r}
+fitLT8 <- Gland_fin_tsibble %>%  model(ARIMA(Bike_La_Lignière))
+report(fitLT8)
+fitLT8 %>% forecast(h = 144) %>% autoplot(Gland_fin_tsibble)
+
+fit.LT8 <- Gland_fin_tsibble %>%  model(ARIMA(Ebike_La_Lignière))
+report(fit.LT8)
+fit.LT8 %>% forecast(h = 144) %>% autoplot(Gland_fin_tsibble)
+```
+
+### Dynamic regression with temperature Bike 
+```{r}
+Gland_fin_tsibble %>% gather("var", "value", Bike_La_Lignière, temp) %>%
+ggplot(aes(x = Date, y = value)) + geom_line() +
+facet_grid(vars(var), scales = "free_y") +
+labs(y = "", title = "Number of bikes borrowed every 10 minutes in Gland La_Lignière")
+
+fitDR_LT8 <- Gland_fin_tsibble %>% model(ARIMA(Bike_La_Lignière ~ temp))
+report(fitDR_LT8)
+
+bind_rows( 'Regression Errors' = as_tibble(residuals(fitDR_LT8, type = "regression")), 'ARIMA Errors' = as_tibble(residuals(fitDR_LT8, type = "innovation")), .id = "type") %>%
+ggplot(aes(x = Date, y = .resid)) + geom_line() + facet_grid(vars(type), scales = "free_y") + labs(y = "")
+
+fitDR_LT8 %>% gg_tsresiduals()
+
+future_Gland_fin_tsibble8 <- new_data(Gland_fin_tsibble, 144) %>% mutate(temp = mean(Gland_fin_tsibble$temp)) 
+forecast(fitDR_LT8, new_data = future_Gland_fin_tsibble8, h = 144) %>% autoplot(Gland_fin_tsibble) +
+labs(y = "Forecast of the number of bikes borrowed every 10 minutes in Gland La_Lignière") 
+```
+
+### Dynamic regression with temperature E-Bike 
+```{r}
+Gland_fin_tsibble %>% gather("var", "value", Ebike_La_Lignière, temp) %>%
+ggplot(aes(x = Date, y = value)) + geom_line() +
+facet_grid(vars(var), scales = "free_y") +
+labs(y = "", title = "Number of Ebikes borrowed every 10 minutes in Gland La_Lignière")
+
+fitDR_eLT8 <- Gland_fin_tsibble %>% model(ARIMA(Ebike_La_Lignière ~ temp))
+report(fitDR_eLT8)
+
+bind_rows( 'Regression Errors' = as_tibble(residuals(fitDR_eLT8, type = "regression")), 'ARIMA Errors' = as_tibble(residuals(fitDR_eLT8, type = "innovation")), .id = "type") %>%
+ggplot(aes(x = Date, y = .resid)) + geom_line() + facet_grid(vars(type), scales = "free_y") + labs(y = "")
+
+fitDR_eLT8 %>% gg_tsresiduals()
+
+future_Gland_fin_tsibble.8 <- new_data(Gland_fin_tsibble, 144) %>% mutate(temp = mean(Gland_fin_tsibble$temp)) 
+forecast(fitDR_eLT8, new_data = future_Gland_fin_tsibble.8, h = 144) %>% autoplot(Gland_fin_tsibble) +
+labs(y = "Forecast of the number of Ebikes borrowed every 10 minutes in Gland La_Lignière") 
+```
+
+------------------------------------------------------------------------------------------------------------------------------
 # 9. Gland Eiekenott
 
-# 10. Gland La Dôle
+### STL Decomposition Bike
+```{r}
+#ETS Decomposition Bike data 
+dcmp <- Gland_fin_tsibble %>% model(STL(Bike_Eikenott))
+components(dcmp) %>% autoplot() + xlab("Date")
+```
 
+### ETS Model Bike
+```{r}
+#ETS forecast
+fit9 <- Gland_fin_tsibble %>%
+model(ETS(Bike_Eikenott ~ error("A") + trend("N") + season("N"), opt_crit = "mse"))
+coefficients(fit9)
+```
 
-# 11. Gland En Bord
+According to the fit, we should set alpha = 0.99.
+```{r}
+FIT9 <- Gland_fin_tsibble %>%
+model(ETS(Bike_Eikenott ~ error("A") + trend("N", alpha=0.99) + season("N")))
+FIT9 %>% forecast(h = 144) %>% autoplot(Gland_fin_tsibble) +
+theme(legend.position = "none")
+FIT9%>%accuracy()
+```
+RMSE = 0.105
+
+### Mean/Naive/S_Naive Model Bike
+```{r}
+mean_model9 <- Gland_fin_tsibble %>% model( Mean = MEAN(Bike_Eikenott),
+Naive = NAIVE(Bike_Eikenott),
+S_Naive = SNAIVE(Bike_Eikenott))
+
+forecast_mean_model9 <- mean_model9 %>% forecast(h = 144) 
+forecast_mean_model9 %>% autoplot(Gland_fin_tsibble, level = NULL) + guides(colour=guide_legend(title = "Forecast"))
+```
+
+### STL decomposition E-Bike
+```{r}
+#STL Decomposition Bike data 
+dcmp <- Gland_fin_tsibble %>% model(STL(Ebike_Eikenott))
+components(dcmp) %>% autoplot() + xlab("Date")
+```
+
+### ETS Model E-Bike
+```{r}
+#ETS forecast
+fit.9 <- Gland_fin_tsibble %>%
+model(ETS(Ebike_Eikenott ~ error("A") + trend("N") + season("N"), opt_crit = "mse"))
+coefficients(fit.9)
+```
+
+According to the fit, we should set alpha = 0.95.
+```{r}
+FIT.9 <- Gland_fin_tsibble %>%
+model(ETS(Ebike_Eikenott ~ error("A") + trend("N", alpha=0.95) + season("N")))
+FIT.9 %>% forecast(h = 144) %>% autoplot(Gland_fin_tsibble) +
+theme(legend.position = "none")
+FIT.9%>%accuracy()
+```
+RMSE = 0.263
+
+### Mean/Naive/S_Naive Model E-Bike
+```{r}
+mean_model.9 <- Gland_fin_tsibble %>% model( Mean = MEAN(Ebike_Eikenott),
+Naive = NAIVE(Ebike_Eikenott),
+S_Naive = SNAIVE(Ebike_Eikenott))
+
+forecast_mean_model.9 <- mean_model.9 %>% forecast(h = 144) 
+forecast_mean_model.9 %>% autoplot(Gland_fin_tsibble, level = NULL) + guides(colour=guide_legend(title = "Forecast"))
+```
+
+### Multiple linear regression Model Bike
+We now fit a multiple linear regression of Bikes with temperatures and precipitations. 
+```{r}
+fit.BikeTempPreLT9 <- Gland_fin_tsibble %>%
+model(tslm = TSLM(Bike_Eikenott ~ temp + prec + ensoll + vent + press))
+report(fit.BikeTempPreLT9)
+```
+The R squares is low (0,18).   
+
+### Multiple linear regression Model Bike
+```{r}
+fit.EBikeTempPreLT.9 <- Gland_fin_tsibble %>%
+model(tslm = TSLM(Ebike_Eikenott ~ temp + prec + ensoll + vent + press))
+report(fit.EBikeTempPreLT.9)
+```
+Here, for E_Bikes ...
+
+Let's see the correlation between these weather variables and Bikes at Eikenott
+```{r}
+Gland_fin_tsibble %>% GGally::ggpairs(columns = c(2,35:39))
+```
+The number of borrowed bikes at Eikenott seems positively correlated with pression (0.373***) .
+
+Let's see the correlation between these weather variables and E_Bikes at Eikenott
+```{r}
+Gland_fin_tsibble %>% GGally::ggpairs(columns = c(3,35:39))
+```
+The number of borrowed E_bikes at Eikenott seems also positively correlated with pression (0.196***).
+
+### TSLM Model Bike
+Here is a forecast with TSLM() on Bike 
+```{r}
+fit.BikeTempPreLT.9 <- Gland_fin_tsibble %>% model(TSLM(Bike_Eikenott ~ trend() + season()))
+fc.BikeTempPreLT.9 <- forecast(fit.BikeTempPreLT.9, h=144)
+fc.BikeTempPreLT.9 %>% autoplot(Gland_fin_tsibble) + xlab("Date") + ylab("Bike_Eikenott")
+
+fit.BikeTempPreLT.9 %>% gg_tsresiduals()
+```
+
+### TSLM Model E-Bike
+Here is a forecast with TSLM() on EBike 
+```{r}
+fit.EBikeTempPreLT.9 <- Gland_fin_tsibble %>% model(TSLM(Ebike_Eikenott ~ trend() + season()))
+fc.EBikeTempPreLT.9 <- forecast(fit.EBikeTempPreLT.9, h=144)
+fc.EBikeTempPreLT.9 %>% autoplot(Gland_fin_tsibble) + xlab("Date") + ylab("E_Eikenott")
+
+fit.EBikeTempPreLT.9 %>% gg_tsresiduals()
+```
+
+### ARIMA model on Bike and Ebike 
+```{r}
+fitLT9 <- Gland_fin_tsibble %>%  model(ARIMA(Bike_Eikenott))
+report(fitLT9)
+fitLT9 %>% forecast(h = 144) %>% autoplot(Gland_fin_tsibble)
+
+fit.LT9 <- Gland_fin_tsibble %>%  model(ARIMA(Ebike_Eikenott))
+report(fit.LT9)
+fit.LT9 %>% forecast(h = 144) %>% autoplot(Gland_fin_tsibble)
+```
+
+### Dynamic regression with temperature Bike 
+```{r}
+Gland_fin_tsibble %>% gather("var", "value", Bike_Eikenott, temp) %>%
+ggplot(aes(x = Date, y = value)) + geom_line() +
+facet_grid(vars(var), scales = "free_y") +
+labs(y = "", title = "Number of bikes borrowed every 10 minutes in Gland Eikenott")
+
+fitDR_LT9 <- Gland_fin_tsibble %>% model(ARIMA(Bike_Eikenott ~ temp))
+report(fitDR_LT9)
+
+bind_rows( 'Regression Errors' = as_tibble(residuals(fitDR_LT9, type = "regression")), 'ARIMA Errors' = as_tibble(residuals(fitDR_LT9, type = "innovation")), .id = "type") %>%
+ggplot(aes(x = Date, y = .resid)) + geom_line() + facet_grid(vars(type), scales = "free_y") + labs(y = "")
+
+fitDR_LT9 %>% gg_tsresiduals()
+
+future_Gland_fin_tsibble9 <- new_data(Gland_fin_tsibble, 144) %>% mutate(temp = mean(Gland_fin_tsibble$temp)) 
+forecast(fitDR_LT9, new_data = future_Gland_fin_tsibble9, h = 144) %>% autoplot(Gland_fin_tsibble) +
+labs(y = "Forecast of the number of bikes borrowed every 10 minutes in Gland Eikenott") 
+```
+
+### Dynamic regression with temperature E-Bike 
+```{r}
+Gland_fin_tsibble %>% gather("var", "value", Ebike_Eikenott, temp) %>%
+ggplot(aes(x = Date, y = value)) + geom_line() +
+facet_grid(vars(var), scales = "free_y") +
+labs(y = "", title = "Number of Ebikes borrowed every 10 minutes in Gland Eikenott")
+
+fitDR_eLT9 <- Gland_fin_tsibble %>% model(ARIMA(Ebike_Eikenott ~ temp))
+report(fitDR_eLT9)
+
+bind_rows( 'Regression Errors' = as_tibble(residuals(fitDR_eLT9, type = "regression")), 'ARIMA Errors' = as_tibble(residuals(fitDR_eLT9, type = "innovation")), .id = "type") %>%
+ggplot(aes(x = Date, y = .resid)) + geom_line() + facet_grid(vars(type), scales = "free_y") + labs(y = "")
+
+fitDR_eLT9 %>% gg_tsresiduals()
+
+future_Gland_fin_tsibble.9 <- new_data(Gland_fin_tsibble, 144) %>% mutate(temp = mean(Gland_fin_tsibble$temp)) 
+forecast(fitDR_eLT9, new_data = future_Gland_fin_tsibble.9, h = 144) %>% autoplot(Gland_fin_tsibble) +
+labs(y = "Forecast of the number of Ebikes borrowed every 10 minutes in Gland Eikenott") 
+```
+
