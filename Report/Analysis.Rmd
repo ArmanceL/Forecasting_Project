@@ -137,13 +137,13 @@ fit.EBikeTempPreLT %>% gg_tsresiduals()
 ARIMA model on Bike and Ebike 
 
 ```{r}
-fit <- Gland_fin_tsibble %>%  model(ARIMA(Bike_Les_Tuillières))
-report(fit)
-fit %>% forecast(h = 144) %>% autoplot(Gland_fin_tsibble)
+fitLT <- Gland_fin_tsibble %>%  model(ARIMA(Bike_Les_Tuillières))
+report(fitLT)
+fitLT %>% forecast(h = 144) %>% autoplot(Gland_fin_tsibble)
 
-fit <- Gland_fin_tsibble %>%  model(ARIMA(Ebike_Les_Tuillières))
-report(fit)
-fit %>% forecast(h = 144) %>% autoplot(Gland_fin_tsibble)
+fitLT <- Gland_fin_tsibble %>%  model(ARIMA(Ebike_Les_Tuillières))
+report(fitLT)
+fitLT %>% forecast(h = 144) %>% autoplot(Gland_fin_tsibble)
 ```
 
 Dynamic regression with temperature. 
