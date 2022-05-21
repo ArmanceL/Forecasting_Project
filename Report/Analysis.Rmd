@@ -34,7 +34,7 @@ components(dcmp) %>% autoplot() + xlab("Date")
 #ETS forecast
 fit1 <- Gland_fin_tsibble %>%
 model(ETS(Bike_Les_Tuillières ~ error("A") + trend("N") + season("N"), opt_crit = "mse"))
-coefficients(fit)
+coefficients(fit1)
 ```
 
 According to the fit, we should set alpha = 0.99, which is exactly equal to the naive model, so the latest observation.
@@ -64,18 +64,18 @@ components(dcmp) %>% autoplot() + xlab("Date")
 
 ```{r}
 #ETS forecast
-fit2 <- Gland_fin_tsibble %>%
+fit.1 <- Gland_fin_tsibble %>%
 model(ETS(Ebike_Les_Tuillières ~ error("A") + trend("N") + season("N"), opt_crit = "mse"))
-coefficients(fit)
+coefficients(fit.1)
 ```
 According to the fit, we should set alpha = 0.99, which is exactly equal to the naive model, so the latest observation.
 
 ```{r}
-FIT2 <- Gland_fin_tsibble %>%
+FIT.1 <- Gland_fin_tsibble %>%
 model(ETS(Ebike_Les_Tuillières ~ error("A") + trend("N", alpha=0.99) + season("N")))
-FIT2 %>% forecast(h = 144) %>% autoplot(Gland_fin_tsibble) +
+FIT.1 %>% forecast(h = 144) %>% autoplot(Gland_fin_tsibble) +
 theme(legend.position = "none")
-FIT2%>%accuracy()
+FIT.1%>%accuracy()
 ```
 
 We also apply the Mean, the Naive and the S_Naive models. 
