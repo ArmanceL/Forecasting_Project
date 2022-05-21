@@ -154,16 +154,16 @@ ggplot(aes(x = Date, y = value)) + geom_line() +
 facet_grid(vars(var), scales = "free_y") +
 labs(y = "", title = "Number of bikes borrowed every 10 minutes in Gland Les Tuillières")
 
-fit <- Gland_fin_tsibble %>% model(ARIMA(Bike_Les_Tuillières ~ temp))
-report(fit)
+fitDR_LT <- Gland_fin_tsibble %>% model(ARIMA(Bike_Les_Tuillières ~ temp))
+report(fitDR_LT)
 
-bind_rows( 'Regression Errors' = as_tibble(residuals(fit, type = "regression")), 'ARIMA Errors' = as_tibble(residuals(fit, type = "innovation")), .id = "type") %>%
+bind_rows( 'Regression Errors' = as_tibble(residuals(fitDR_LT, type = "regression")), 'ARIMA Errors' = as_tibble(residuals(fitDR_LT, type = "innovation")), .id = "type") %>%
 ggplot(aes(x = Date, y = .resid)) + geom_line() + facet_grid(vars(type), scales = "free_y") + labs(y = "")
 
-fit %>% gg_tsresiduals()
+fitDR_LT %>% gg_tsresiduals()
 
-future_Gland_fin_tsibble <- new_data(Gland_fin_tsibble, 144) %>% mutate(temp = mean(Gland_fin_tsibble$temp)) 
-forecast(fit, new_data = future_Gland_fin_tsibble, h = 144) %>% autoplot(Gland_fin_tsibble) +
+future_Gland_fin_tsibble1 <- new_data(Gland_fin_tsibble, 144) %>% mutate(temp = mean(Gland_fin_tsibble$temp)) 
+forecast(fitDR_LT, new_data = future_Gland_fin_tsibble1, h = 144) %>% autoplot(Gland_fin_tsibble) +
 labs(y = "Forecast of the number of bikes borrowed every 10 minutes in Gland Les Tuillières") 
 ```
 
@@ -174,16 +174,16 @@ ggplot(aes(x = Date, y = value)) + geom_line() +
 facet_grid(vars(var), scales = "free_y") +
 labs(y = "", title = "Number of Ebikes borrowed every 10 minutes in Gland Les Tuillières")
 
-fit <- Gland_fin_tsibble %>% model(ARIMA(Ebike_Les_Tuillières ~ temp))
-report(fit)
+fitDR_eLT <- Gland_fin_tsibble %>% model(ARIMA(Ebike_Les_Tuillières ~ temp))
+report(fitDR_eLT)
 
-bind_rows( 'Regression Errors' = as_tibble(residuals(fit, type = "regression")), 'ARIMA Errors' = as_tibble(residuals(fit, type = "innovation")), .id = "type") %>%
+bind_rows( 'Regression Errors' = as_tibble(residuals(fitDR_eLT, type = "regression")), 'ARIMA Errors' = as_tibble(residuals(fitDR_eLT, type = "innovation")), .id = "type") %>%
 ggplot(aes(x = Date, y = .resid)) + geom_line() + facet_grid(vars(type), scales = "free_y") + labs(y = "")
 
-fit %>% gg_tsresiduals()
+fitDR_eLT %>% gg_tsresiduals()
 
-future_Gland_fin_tsibble <- new_data(Gland_fin_tsibble, 144) %>% mutate(temp = mean(Gland_fin_tsibble$temp)) 
-forecast(fit, new_data = future_Gland_fin_tsibble, h = 144) %>% autoplot(Gland_fin_tsibble) +
+future_Gland_fin_tsibble.1 <- new_data(Gland_fin_tsibble, 144) %>% mutate(temp = mean(Gland_fin_tsibble$temp)) 
+forecast(fitDR_eLT, new_data = future_Gland_fin_tsibble.1, h = 144) %>% autoplot(Gland_fin_tsibble) +
 labs(y = "Forecast of the number of Ebikes borrowed every 10 minutes in Gland Les Tuillières") 
 ```
 
