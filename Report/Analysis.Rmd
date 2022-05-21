@@ -48,11 +48,11 @@ FIT1%>%accuracy()
 
 We now apply the Mean, the Naive and the S_Naive models. 
 ```{r}
-mean_model <- Gland_fin_tsibble %>% model( Mean = MEAN(Bike_Les_Tuillières),
+mean_model1 <- Gland_fin_tsibble %>% model( Mean = MEAN(Bike_Les_Tuillières),
 Naive = NAIVE(Bike_Les_Tuillières),
 S_Naive = SNAIVE(Bike_Les_Tuillières))
 
-forecast_mean_model <- mean_model %>% forecast(h = 144) 
+forecast_mean_model1 <- mean_model1 %>% forecast(h = 144) 
 forecast_mean_model %>% autoplot(Gland_fin_tsibble, level = NULL) + guides(colour=guide_legend(title = "Forecast"))
 ```
 We do the same for the *E_Bike* data, with an STL decomposition and an ETS forecast. 
@@ -80,11 +80,11 @@ FIT.1%>%accuracy()
 
 We also apply the Mean, the Naive and the S_Naive models. 
 ```{r}
-mean_model <- Gland_fin_tsibble %>% model( Mean = MEAN(Ebike_Les_Tuillières),
+mean_model.1 <- Gland_fin_tsibble %>% model( Mean = MEAN(Ebike_Les_Tuillières),
 Naive = NAIVE(Ebike_Les_Tuillières),
 S_Naive = SNAIVE(Ebike_Les_Tuillières))
 
-forecast_mean_model <- mean_model %>% forecast(h = 144) 
+forecast_mean_model.1 <- mean_model.1 %>% forecast(h = 144) 
 forecast_mean_model %>% autoplot(Gland_fin_tsibble, level = NULL) + guides(colour=guide_legend(title = "Forecast"))
 ```
 
