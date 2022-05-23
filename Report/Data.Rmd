@@ -8,6 +8,13 @@ date: '2022-05-15'
 source(here::here("Setup/setup.R"))
 ```
 
+In this first part, we download the data into R. Then, we will apply the necessary transformations on these data so that they can be correctly exploited for the following analysis.
+
+The first thing we notice is the lack of observations for certain dates and time periods. Indeed, in order to perform our analyses, a database without missing values is essential. As our prediction of the number of bicycles used in the different stations of Gland must be done for every 10 minutes on May 25, 2022, our analysis must be done every 10 minutes for the time periods we have available (from .../.../... to .../.../...). 
+We then eliminated a few days at the beginning of our database because it was information every 30 minutes. Also, we replaced the rest of the possible missing data by 0 or last value before that one ? , for a given station.  
+
+--> describe more precisely what has been done for NAs
+
 ### Part 1 : Data preparation 
 
 Load the dataset
