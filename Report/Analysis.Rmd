@@ -11,13 +11,21 @@ source(here::here("Setup/setup.R"))
 ### Part 3 : Analysis 
 
 ```{r}
-#library(visdat)
 vis_miss(Gland_fin_tsibble)
 ```
-We replace the last missing values by the last one without missing value, for a given station.
+
 ```{r}
 Gland_fin_tsibble <- na_locf(Gland_fin_tsibble)
 ```
+```{r}
+vis_miss(Gland_fin_2)
+which(is.na(Gland_fin_2), arr.ind = TRUE)
+
+Gland_fin_2 <- na_locf(Gland_fin_2)
+```
+
+We replace the last missing values by the last one without missing value, for a given station.
+
 ---------------------------------------------------------------------------------------------------------------------------
 # 1. Gland Les Tuillières
 
