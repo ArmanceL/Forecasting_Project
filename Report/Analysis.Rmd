@@ -932,10 +932,10 @@ model(ETS(Bike_Grand_Rue ~ error("A") + trend("N") + season("A"), opt_crit = "ms
 coefficients(fit6)
 ```
 
-According to the fit, we should set alpha = 0.96.
+According to the fit, we should set alpha = 0.93.
 ```{r}
 FIT6 <- Gland_fin_tsibble %>%
-model(ETS(Bike_Grand_Rue ~ error("A") + trend("N", alpha=0.96) + season("A")))
+model(ETS(Bike_Grand_Rue ~ error("A") + trend("N", alpha=0.93) + season("A")))
 FIT6 %>% forecast(h = 144) %>% autoplot(Gland_fin_tsibble) +
 theme(legend.position = "none")
 FIT6%>%accuracy()
@@ -967,15 +967,15 @@ model(ETS(Ebike_Grand_Rue ~ error("A") + trend("N") + season("A"), opt_crit = "m
 coefficients(fit.6)
 ```
 
-According to the fit, we should set alpha = 1.
+According to the fit, we should set alpha = 0.98.
 ```{r}
 FIT.6 <- Gland_fin_tsibble %>%
-model(ETS(Ebike_Grand_Rue ~ error("A") + trend("N", alpha=1) + season("A")))
+model(ETS(Ebike_Grand_Rue ~ error("A") + trend("N", alpha=0.98) + season("A")))
 FIT.6 %>% forecast(h = 144) %>% autoplot(Gland_fin_tsibble) +
 theme(legend.position = "none")
 FIT.6%>%accuracy()
 ```
-RMSE = NaN
+RMSE = 0.364
 
 ### Mean/Naive/S_Naive Model E-Bike
 ```{r}
@@ -1105,10 +1105,10 @@ model(ETS(Bike_La_Falaise ~ error("A") + trend("N") + season("A"), opt_crit = "m
 coefficients(fit7)
 ```
 
-According to the fit, we should set alpha = 0.91.
+According to the fit, we should set alpha = 0.88.
 ```{r}
 FIT7 <- Gland_fin_tsibble %>%
-model(ETS(Bike_La_Falaise ~ error("A") + trend("N", alpha=0.91) + season("A")))
+model(ETS(Bike_La_Falaise ~ error("A") + trend("N", alpha=0.88) + season("A")))
 FIT7 %>% forecast(h = 144) %>% autoplot(Gland_fin_tsibble) +
 theme(legend.position = "none")
 FIT7%>%accuracy()
@@ -1140,15 +1140,15 @@ model(ETS(Ebike_La_Falaise ~ error("A") + trend("N") + season("A"), opt_crit = "
 coefficients(fit.7)
 ```
 
-According to the fit, we should set alpha = 0.98.
+According to the fit, we should set alpha = 0.92.
 ```{r}
 FIT.7 <- Gland_fin_tsibble %>%
-model(ETS(Ebike_La_Falaise ~ error("A") + trend("N", alpha=0.98) + season("A")))
+model(ETS(Ebike_La_Falaise ~ error("A") + trend("N", alpha=0.92) + season("A")))
 FIT.7 %>% forecast(h = 144) %>% autoplot(Gland_fin_tsibble) +
 theme(legend.position = "none")
 FIT.7%>%accuracy()
 ```
-RMSE = 0.174
+RMSE = 0.175
 
 ### Mean/Naive/S_Naive Model E-Bike
 ```{r}
@@ -1278,10 +1278,10 @@ model(ETS(Bike_La_Lignière ~ error("A") + trend("N") + season("A"), opt_crit = 
 coefficients(fit8)
 ```
 
-According to the fit, we should set alpha = 0.94.
+According to the fit, we should set alpha = 0.93.
 ```{r}
 FIT8 <- Gland_fin_tsibble %>%
-model(ETS(Bike_La_Lignière ~ error("A") + trend("N", alpha=0.94) + season("A")))
+model(ETS(Bike_La_Lignière ~ error("A") + trend("N", alpha=0.93) + season("A")))
 FIT8 %>% forecast(h = 144) %>% autoplot(Gland_fin_tsibble) +
 theme(legend.position = "none")
 FIT8%>%accuracy()
@@ -1313,10 +1313,10 @@ model(ETS(Ebike_La_Lignière ~ error("A") + trend("N") + season("A"), opt_crit =
 coefficients(fit.8)
 ```
 
-According to the fit, we should set alpha = 0.96.
+According to the fit, we should set alpha = 0.97.
 ```{r}
 FIT.8 <- Gland_fin_tsibble %>%
-model(ETS(Ebike_La_Lignière ~ error("A") + trend("N", alpha=0.96) + season("A")))
+model(ETS(Ebike_La_Lignière ~ error("A") + trend("N", alpha=0.97) + season("A")))
 FIT.8 %>% forecast(h = 144) %>% autoplot(Gland_fin_tsibble) +
 theme(legend.position = "none")
 FIT.8%>%accuracy()
@@ -1451,15 +1451,15 @@ model(ETS(Bike_Eikenott ~ error("A") + trend("N") + season("A"), opt_crit = "mse
 coefficients(fit9)
 ```
 
-According to the fit, we should set alpha = 0.99.
+According to the fit, we should set alpha = 0.96.
 ```{r}
 FIT9 <- Gland_fin_tsibble %>%
-model(ETS(Bike_Eikenott ~ error("A") + trend("N", alpha=0.99) + season("A")))
+model(ETS(Bike_Eikenott ~ error("A") + trend("N", alpha=0.96) + season("A")))
 FIT9 %>% forecast(h = 144) %>% autoplot(Gland_fin_tsibble) +
 theme(legend.position = "none")
 FIT9%>%accuracy()
 ```
-RMSE = 0.105
+RMSE = 0.106
 
 ### Mean/Naive/S_Naive Model Bike
 ```{r}
@@ -1624,10 +1624,10 @@ model(ETS(Bike_La_Dôle ~ error("A") + trend("N") + season("A"), opt_crit = "mse
 coefficients(fit10)
 ```
 
-According to the fit, we should set alpha = 0.99.
+According to the fit, we should set alpha = 0.95.
 ```{r}
 FIT10 <- Gland_fin_tsibble %>%
-model(ETS(Bike_La_Dôle ~ error("A") + trend("N", alpha=0.99) + season("A")))
+model(ETS(Bike_La_Dôle ~ error("A") + trend("N", alpha=0.95) + season("A")))
 FIT10 %>% forecast(h = 144) %>% autoplot(Gland_fin_tsibble) +
 theme(legend.position = "none")
 FIT10%>%accuracy()
@@ -1659,15 +1659,15 @@ model(ETS(Ebike_La_Dôle ~ error("A") + trend("N") + season("A"), opt_crit = "ms
 coefficients(fit.10)
 ```
 
-According to the fit, we should set alpha = 1.
+According to the fit, we should set alpha = 0.197.
 ```{r}
 FIT.10 <- Gland_fin_tsibble %>%
-model(ETS(Ebike_La_Dôle ~ error("A") + trend("N", alpha=1) + season("A")))
+model(ETS(Ebike_La_Dôle ~ error("A") + trend("N", alpha=0.197) + season("A")))
 FIT.10 %>% forecast(h = 144) %>% autoplot(Gland_fin_tsibble) +
 theme(legend.position = "none")
 FIT.10%>%accuracy()
 ```
-RMSE = Nan
+RMSE = 0.131
 
 ### Mean/Naive/S_Naive Model E-Bike
 ```{r}
@@ -1832,10 +1832,10 @@ model(ETS(Ebike_En_Bord ~ error("A") + trend("N") + season("A"), opt_crit = "mse
 coefficients(fit.11)
 ```
 
-According to the fit, we should set alpha = 93.
+According to the fit, we should set alpha = 0.92.
 ```{r}
 FIT.11 <- Gland_fin_tsibble %>%
-model(ETS(Ebike_En_Bord ~ error("A") + trend("N", alpha=0.93) + season("A")))
+model(ETS(Ebike_En_Bord ~ error("A") + trend("N", alpha=0.92) + season("A")))
 FIT.11 %>% forecast(h = 144) %>% autoplot(Gland_fin_tsibble) +
 theme(legend.position = "none")
 FIT.11%>%accuracy()
