@@ -12,13 +12,12 @@ source(here::here("Setup/setup.R"))
 ### Part 2 : Exploratory Data Analysis (EDA)
 
 
-To plot different variable in the same grap thy need to be comparble
+To plot different variable in the same graph they need to be comparble
 ```{r}
 #search for a max Bike and EBike value for every station
 max(Gland_fin[ , c(2,3,5,6,8,9,11,12,14,15,17,18,20,21,23,24,26,27,29,30,32,33)], na.rm = TRUE)
 #The max number of bycicle in a station is 12, so we will scale the weather variables from 0 to 12
 ```
-
 Scaling process
 ```{r}
 #internal variance
@@ -160,6 +159,7 @@ Gland_Les_Tuillières_E_Bike_tsibble <- as_tsibble(Gland_Les_Tuillières%>%
 autoplot(Gland_Les_Tuillières_Bike_tsibble)
 autoplot(Gland_Les_Tuillières_E_Bike_tsibble)
 ```
+
 ## Gland Swissquote
 ```{r}
 #Bike data 
@@ -204,7 +204,6 @@ Gland_UICN_E_Bike_tsibble <- as_tsibble(Gland_UICN%>%
 autoplot(Gland_UICN_Bike_tsibble)
 autoplot(Gland_UICN_E_Bike_tsibble)
 ```
-
 
 ## Gland Montoly
 ```{r}
@@ -320,17 +319,5 @@ Gland_fin_tsibble <- as_tsibble(Gland_fin, index = Date)
 
 
 
-
-1. Gland_Les_Tuillières : No clear trend or seasonality 
-2. Gland_Swissquote : No clear trend or seasonality 
-3. Gland_Gare_Sud : No clear trend or seasonality 
-4. Gland_UICN : Some movement and maybe a little bit of seasonality 
-5. Gland_Montoly : No clear trend or seasonality 
-6. Gland_Grande_Rue : Some movement and maybe a little bit of seasonality 
-7. Gland_La_Falaise : No clear trend or seasonality 
-8. Gland_La_Lignère : No clear trend or seasonality 
-9. Gland_Eikenott : Some movement in the trend and maybe a little bit of seasonality
-10. Gland_La_Dôle : No clear trend or seasonality 
-11. Gland_En_Bord : Almost zero pattern (no movement of the line)
 In all the station the capacity is far away from beiing reach. 
 
