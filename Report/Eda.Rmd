@@ -310,11 +310,14 @@ autoplot(Gland_En_Bord_Bike_tsibble)
 autoplot(Gland_En_Bord_E_Bike_tsibble)
 ```
 
-We convert the all Gland_fin dataset into tsibble data.
+We convert the two Gland_fin and Gland_fin_2 dataset into tsibble data.
 ```{r}
 Gland_fin_tsibble <- as_tsibble(Gland_fin, index = Date)
 ```
 
+```{r}
+Gland_fin_2_tsibble <- as_tsibble(Gland_fin_2, index = Date)
+```
 
 
 
