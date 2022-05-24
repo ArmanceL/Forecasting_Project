@@ -415,12 +415,12 @@ coefficients(fit3)
 According to the fit, we should set alpha = 0.94.
 ```{r}
 FIT3 <- Gland_fin_tsibble %>%
-model(ETS(Bike_Gare_Sud ~ error("A") + trend("N", alpha=0.94) + season("A")))
+model(ETS(Bike_Gare_Sud ~ error("A") + trend("N", alpha=0.95) + season("A")))
 FIT3 %>% forecast(h = 144) %>% autoplot(Gland_fin_tsibble) +
 theme(legend.position = "none")
 FIT3%>%accuracy()
 ```
-RMSE = 0.295
+RMSE = 0.294
 
 ### Mean/Naive/S_Naive Model Bike
 ```{r}
@@ -455,7 +455,7 @@ FIT.3 %>% forecast(h = 144) %>% autoplot(Gland_fin_tsibble) +
 theme(legend.position = "none")
 FIT.3%>%accuracy()
 ```
-RMSE = 0.442
+RMSE = 0.44
 
 ### Mean/Naive/S_Naive Model E-Bike
 ```{r}
@@ -759,10 +759,10 @@ model(ETS(Bike_Montoly ~ error("A") + trend("N") + season("A"), opt_crit = "mse"
 coefficients(fit5)
 ```
 
-According to the fit, we should set alpha = 0.87.
+According to the fit, we should set alpha = 0.847.
 ```{r}
 FIT5 <- Gland_fin_tsibble %>%
-model(ETS(Bike_Montoly ~ error("A") + trend("N", alpha=0.87) + season("A")))
+model(ETS(Bike_Montoly ~ error("A") + trend("N", alpha=0.84) + season("A")))
 FIT5 %>% forecast(h = 144) %>% autoplot(Gland_fin_tsibble) +
 theme(legend.position = "none")
 FIT5%>%accuracy()
