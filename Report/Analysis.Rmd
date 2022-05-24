@@ -1965,6 +1965,8 @@ Tab.final <- cbind(Tab.fin,Tab1)
 Tab.final <- Tab.final %>%
   relocate(Date)
 
+Tab.final[Tab.final < 0] <- 0     # Set negative values to 0
+
 View(Tab.final)
 ```
 
