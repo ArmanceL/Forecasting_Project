@@ -199,6 +199,8 @@ df.gland <-Gland_fin_tsibble[,c("Bike_Eikenott","Ebike_Eikenott","Bike_En_Bord",
 
 VARselect(df.gland, lag.max = 4, type = "const", season = 4)
 var.model_lev <- VAR(df.gland, p = 2, type = "const", season = 4)
+accuracy(var.model_lev$varresult[[1]])
+
 var.pred <- predict(var.model_lev, n.ahead = 144, ci = 0.90)
 
 Var.stations <- as.data.frame(var.pred["fcst"])
