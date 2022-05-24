@@ -1942,8 +1942,8 @@ labs(y = "Forecast of the number of Ebikes borrowed every 10 minutes in Gland En
 ```{r}
 df.gland <-Gland_fin_2[,c("Bike_Eikenott","Ebike_Eikenott","Bike_En_Bord","Ebike_En_Bord","Ebike_Gare_Sud", "Bike_Gare_Sud","Ebike_La_Dôle","Bike_La_Dôle","Ebike_Grand_Rue", "Bike_Grand_Rue","Ebike_La_Falaise","Bike_La_Falaise","Ebike_La_Lignière","Bike_La_Lignière","Ebike_Les_Tuillières","Bike_Les_Tuillières","Ebike_Montoly","Bike_Montoly","Ebike_Swissquote","Bike_Swissquote","Ebike_UICN","Bike_UICN")]
 
-VARselect(df.gland, lag.max = 4, type = "const", season = 4)
-var.model_lev <- VAR(df.gland, p = 2, type = "const", season = 4)
+VARselect(df.gland, lag.max = 4, type = "const", season = 233)
+var.model_lev <- VAR(df.gland, p = 4, type = "const", season = 233)
 accuracy(var.model_lev$varresult[[1]])
 
 var.pred <- predict(var.model_lev, n.ahead = 233, ci = 0.90)
