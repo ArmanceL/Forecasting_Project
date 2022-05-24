@@ -12,7 +12,7 @@ source(here::here("Setup/setup.R"))
 In this first part, we download the data into R. Then, we will apply the necessary transformations on these data so that they can be correctly exploited for the following analysis.
 
 The first thing we notice is the lack of observations for certain dates and time periods. Indeed, in order to perform our analyses, a database without missing values is essential. As our prediction of the number of bicycles used in the different stations of Gland must be done for every 10 minutes on May 25, 2022, our analysis must be done every 10 minutes for the time periods we have available (from .../.../... to .../.../...). 
-We then eliminated a few days at the beginning of our database because it was information every 30 minutes. Also, we replaced the rest of the possible missing data by 0 or last value before that one ? , for a given station.  
+We then eliminated a few days at the beginning of our database because it was information every 30 minutes. We also created 2 major data frame, one containing datas for each station and every weather component, and the other containing only the stations data. During this process we needed to solve some problems as different dates formats and some missing dates.
 
 --> describe more precisely what has been done for NAs
 
@@ -51,7 +51,7 @@ row.names(Precipitation) <- NULL #reset the index
 Precipitation$Time <- as.character(Precipitation$Time) 
 ```
 
-now for every weather variable we can select the numbers needed from their position into the character value and creating the year/month/day/hour/minute columns
+For every weather variable we can select the numbers needed from their position into the character value and creating the year/month/day/hour/minute columns
 ```{r}
 
 Precipitation$Year <- substr(Precipitation$Time,1,4)
@@ -202,7 +202,7 @@ Gland_La_Lignière$ID <- NULL
 
 ```
 
-#searching for NA values
+searching for NA values
 ```{r}
 which(is.na(Gland_Les_Tuillières))
 which(is.na(Gland_Swissquote))
@@ -217,10 +217,11 @@ which(is.na(Gland_La_Dôle))
 which(is.na(Gland_En_Bord))
 
 ```
-
 no N/A found
-First and last Date value for every dataset 
 
+## Data Wrangling
+
+First and last Date value for every dataset 
 ```{r}
 Precipitation[ c(1,nrow(Precipitation)), "Date"]
 Gland_Eikenott[ c(1,nrow(Gland_Eikenott)), "Date"]
@@ -361,7 +362,7 @@ head(unique(Temperature$Date))
 head(unique(Gland_Eikenott$Date))
 ```
 
-We compare
+Compare
 We select precipitation observations that have as date value a value not in common with station data
 ```{r}
 Precipitation[!Precipitation$Date %in% Gland_Eikenott$Date, ]
@@ -432,15 +433,15 @@ row.names(Gland_La_Lignière) <- NULL
 
 ```
 
-# Final full dataset
-
+# Final dataset station and weather
+Bind every needed dataset
 ```{r}
 Gland_tot_clean <- bind_cols(Gland_Eikenott, Gland_En_Bord, Gland_Gare_Sud, Gland_Grand_Rue, Gland_La_Dôle, Gland_La_Falaise, Gland_La_Lignière, Gland_Les_Tuillières, Gland_Montoly, Gland_Swissquote, Gland_UICN, Precipitation, Temperature, Ensoleillement, Vent, Pression) #bind every data frame needed
 Gland_fin <- Gland_tot_clean[-c(8,12,16,20,24,28,32,36,40,44,46,48,50,52,54)]
 Gland_fin <- Gland_fin[ , c(4,1:3,5:39)]
 ```
 
-Renaming the final dataset
+Renaming the final dataset and last adjustements
 ```{r}
 colnames(Gland_fin) <- c("Date","Bike_Eikenott", "Ebike_Eikenott", "Capacity_Eikenott", "Bike_En_Bord", "Ebike_En_Bord", "Capacity_En_Bord", "Bike_Gare_Sud", "Ebike_Gare_Sud", "Capacity_Gare_Sud", "Bike_Grand_Rue", "Ebike_Grand_Rue", "Capacity_Grand_Rue", "Bike_La_Dôle", "Ebike_La_Dôle", "Capacity_La_Dôle", "Bike_La_Falaise", "Ebike_La_Falaise", "Capacity_La_Falaise", "Bike_La_Lignière", "Ebike_La_Lignière", "Capacity_La_Lignière", "Bike_Les_Tuillières", "Ebike_Les_Tuillières", "Capacity_Les_Tuillières", "Bike_Montoly", "Ebike_Montoly", "Capacity_Montoly", "Bike_Swissquote", "Ebike_Swissquote", "Capacity_Swissquote", "Bike_UICN", "Ebike_UICN", "Capacity_UICN","prec","temp","ensoll","vent","press")
 
@@ -452,12 +453,10 @@ Gland_fin$press <- as.numeric(Gland_fin$press)
 
 head(Gland_fin)
 ```
-
-
 The first dataset is now ready to be used. 
 
 
-#### PART 2 -> NEW DATA
+## PART 2 -> Dataset only for stations
 
 Building the dataset for every Gland station
 
@@ -500,7 +499,7 @@ colnames(Gland_En_Bord_fin) <- c("Bike","E_Bike","Capacity","Date","Name","ID")
 
 ```
 
-#The first 117 observations are 1 per our and not every 10 minuts -> eliminate
+The first 117 observations are 1 per our and not every 10 minuts -> eliminate
 ```{r}
 #discover the tot number of observation per station (every station has the same size, just one is needed) 
 nobs2 <- nrow(Gland_Eikenott_fin)
@@ -564,21 +563,18 @@ Gland_La_Lignière_fin$ID <- NULL
 
 ```
 
+Bind the data
 ```{r}
 Gland_tot_clean_fin <- bind_cols(Gland_Eikenott_fin, Gland_En_Bord_fin, Gland_Gare_Sud_fin, Gland_Grand_Rue_fin, Gland_La_Dôle_fin, Gland_La_Falaise_fin, Gland_La_Lignière_fin, Gland_Les_Tuillières_fin, Gland_Montoly_fin, Gland_Swissquote_fin, Gland_UICN_fin) #bind every data frame needed
 Gland_fin_2 <- Gland_tot_clean_fin[-c(8,12,16,20,24,28,32,36,40,44)]
 Gland_fin_2 <- Gland_fin_2[ , c(4,1:3,5:34)]
 ```
-
+Renameing
 ```{r}
 colnames(Gland_fin_2) <- c("Date","Bike_Eikenott", "Ebike_Eikenott", "Capacity_Eikenott", "Bike_En_Bord", "Ebike_En_Bord", "Capacity_En_Bord", "Bike_Gare_Sud", "Ebike_Gare_Sud", "Capacity_Gare_Sud", "Bike_Grand_Rue", "Ebike_Grand_Rue", "Capacity_Grand_Rue", "Bike_La_Dôle", "Ebike_La_Dôle", "Capacity_La_Dôle", "Bike_La_Falaise", "Ebike_La_Falaise", "Capacity_La_Falaise", "Bike_La_Lignière", "Ebike_La_Lignière", "Capacity_La_Lignière", "Bike_Les_Tuillières", "Ebike_Les_Tuillières", "Capacity_Les_Tuillières", "Bike_Montoly", "Ebike_Montoly", "Capacity_Montoly", "Bike_Swissquote", "Ebike_Swissquote", "Capacity_Swissquote", "Bike_UICN", "Ebike_UICN", "Capacity_UICN")
 ```
-
+Adding missing dates
 ```{r}
-
 Gland_fin_2 <- Gland_fin_2 %>% pad()
-
 ```
-
-
 The second bike dataset of the most updated data is ready to be used. 
