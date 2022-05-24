@@ -219,13 +219,7 @@ Tab.final <- cbind(Tab.fin,Tab1)
 
 ```
 
-
-
-
-
-
-
-
+------------------------------------------------------------------------------------------------------------------------------------------------------
 
 # 2. Gland Swissquote
 
@@ -398,20 +392,10 @@ labs(y = "Forecast of the number of Ebikes borrowed every 10 minutes in Gland Sw
 ```
 
 
-
-
-
-
-
-
-
-
-
-
 ------------------------------------------------------------------------------------------------------------------------------
 # 3. Gland Gare Sud
 
-### 3.1 STL Decomposition Bike
+### STL Decomposition Bike
 ```{r}
 #ETS Decomposition Bike data 
 dcmp <- Gland_fin_tsibble %>% model(STL(Bike_Gare_Sud))
@@ -422,14 +406,14 @@ components(dcmp) %>% autoplot() + xlab("Date")
 ```{r}
 #ETS forecast
 fit3 <- Gland_fin_tsibble %>%
-model(ETS(Bike_Gare_Sud ~ error("A") + trend("N") + season("N"), opt_crit = "mse"))
+model(ETS(Bike_Gare_Sud ~ error("A") + trend("N") + season("A"), opt_crit = "mse"))
 coefficients(fit3)
 ```
 
 According to the fit, we should set alpha = 0.94.
 ```{r}
 FIT3 <- Gland_fin_tsibble %>%
-model(ETS(Bike_Gare_Sud ~ error("A") + trend("N", alpha=0.94) + season("N")))
+model(ETS(Bike_Gare_Sud ~ error("A") + trend("N", alpha=0.94) + season("A")))
 FIT3 %>% forecast(h = 144) %>% autoplot(Gland_fin_tsibble) +
 theme(legend.position = "none")
 FIT3%>%accuracy()
@@ -457,14 +441,14 @@ components(dcmp) %>% autoplot() + xlab("Date")
 ```{r}
 #ETS forecast
 fit.3 <- Gland_fin_tsibble %>%
-model(ETS(Ebike_Gare_Sud ~ error("A") + trend("N") + season("N"), opt_crit = "mse"))
+model(ETS(Ebike_Gare_Sud ~ error("A") + trend("N") + season("A"), opt_crit = "mse"))
 coefficients(fit.3)
 ```
 
 According to the fit, we should set alpha = 0.95.
 ```{r}
 FIT.3 <- Gland_fin_tsibble %>%
-model(ETS(Ebike_Gare_Sud ~ error("A") + trend("N", alpha=0.95) + season("N")))
+model(ETS(Ebike_Gare_Sud ~ error("A") + trend("N", alpha=0.95) + season("A")))
 FIT.3 %>% forecast(h = 144) %>% autoplot(Gland_fin_tsibble) +
 theme(legend.position = "none")
 FIT.3%>%accuracy()
@@ -596,14 +580,14 @@ components(dcmp) %>% autoplot() + xlab("Date")
 ```{r}
 #ETS forecast
 fit4 <- Gland_fin_tsibble %>%
-model(ETS(Bike_UICN ~ error("A") + trend("N") + season("N"), opt_crit = "mse"))
+model(ETS(Bike_UICN ~ error("A") + trend("N") + season("A"), opt_crit = "mse"))
 coefficients(fit4)
 ```
 
 According to the fit, we should set alpha = 0.95.
 ```{r}
 FIT4 <- Gland_fin_tsibble %>%
-model(ETS(Bike_UICN ~ error("A") + trend("N", alpha=0.95) + season("N")))
+model(ETS(Bike_UICN ~ error("A") + trend("N", alpha=0.95) + season("A")))
 FIT4 %>% forecast(h = 144) %>% autoplot(Gland_fin_tsibble) +
 theme(legend.position = "none")
 FIT4%>%accuracy()
@@ -631,14 +615,14 @@ components(dcmp) %>% autoplot() + xlab("Date")
 ```{r}
 #ETS forecast
 fit.4 <- Gland_fin_tsibble %>%
-model(ETS(Ebike_UICN ~ error("A") + trend("N") + season("N"), opt_crit = "mse"))
+model(ETS(Ebike_UICN ~ error("A") + trend("N") + season("A"), opt_crit = "mse"))
 coefficients(fit.4)
 ```
 
 According to the fit, we should set alpha = 0.98.
 ```{r}
 FIT.4 <- Gland_fin_tsibble %>%
-model(ETS(Ebike_UICN ~ error("A") + trend("N", alpha=0.98) + season("N")))
+model(ETS(Ebike_UICN ~ error("A") + trend("N", alpha=0.98) + season("A")))
 FIT.4 %>% forecast(h = 144) %>% autoplot(Gland_fin_tsibble) +
 theme(legend.position = "none")
 FIT.4%>%accuracy()
@@ -769,14 +753,14 @@ components(dcmp) %>% autoplot() + xlab("Date")
 ```{r}
 #ETS forecast
 fit5 <- Gland_fin_tsibble %>%
-model(ETS(Bike_Montoly ~ error("A") + trend("N") + season("N"), opt_crit = "mse"))
+model(ETS(Bike_Montoly ~ error("A") + trend("N") + season("A"), opt_crit = "mse"))
 coefficients(fit5)
 ```
 
 According to the fit, we should set alpha = 0.87.
 ```{r}
 FIT5 <- Gland_fin_tsibble %>%
-model(ETS(Bike_Montoly ~ error("A") + trend("N", alpha=0.87) + season("N")))
+model(ETS(Bike_Montoly ~ error("A") + trend("N", alpha=0.87) + season("A")))
 FIT5 %>% forecast(h = 144) %>% autoplot(Gland_fin_tsibble) +
 theme(legend.position = "none")
 FIT5%>%accuracy()
@@ -804,14 +788,14 @@ components(dcmp) %>% autoplot() + xlab("Date")
 ```{r}
 #ETS forecast
 fit.5 <- Gland_fin_tsibble %>%
-model(ETS(Ebike_Montoly ~ error("A") + trend("N") + season("N"), opt_crit = "mse"))
+model(ETS(Ebike_Montoly ~ error("A") + trend("N") + season("A"), opt_crit = "mse"))
 coefficients(fit.5)
 ```
 
 According to the fit, we should set alpha = 0.96.
 ```{r}
 FIT.5 <- Gland_fin_tsibble %>%
-model(ETS(Ebike_Montoly ~ error("A") + trend("N", alpha=0.96) + season("N")))
+model(ETS(Ebike_Montoly ~ error("A") + trend("N", alpha=0.96) + season("A")))
 FIT.5 %>% forecast(h = 144) %>% autoplot(Gland_fin_tsibble) +
 theme(legend.position = "none")
 FIT.5%>%accuracy()
@@ -942,14 +926,14 @@ components(dcmp) %>% autoplot() + xlab("Date")
 ```{r}
 #ETS forecast
 fit6 <- Gland_fin_tsibble %>%
-model(ETS(Bike_Grand_Rue ~ error("A") + trend("N") + season("N"), opt_crit = "mse"))
+model(ETS(Bike_Grand_Rue ~ error("A") + trend("N") + season("A"), opt_crit = "mse"))
 coefficients(fit6)
 ```
 
 According to the fit, we should set alpha = 0.96.
 ```{r}
 FIT6 <- Gland_fin_tsibble %>%
-model(ETS(Bike_Grand_Rue ~ error("A") + trend("N", alpha=0.96) + season("N")))
+model(ETS(Bike_Grand_Rue ~ error("A") + trend("N", alpha=0.96) + season("A")))
 FIT6 %>% forecast(h = 144) %>% autoplot(Gland_fin_tsibble) +
 theme(legend.position = "none")
 FIT6%>%accuracy()
@@ -977,14 +961,14 @@ components(dcmp) %>% autoplot() + xlab("Date")
 ```{r}
 #ETS forecast
 fit.6 <- Gland_fin_tsibble %>%
-model(ETS(Ebike_Grand_Rue ~ error("A") + trend("N") + season("N"), opt_crit = "mse"))
+model(ETS(Ebike_Grand_Rue ~ error("A") + trend("N") + season("A"), opt_crit = "mse"))
 coefficients(fit.6)
 ```
 
 According to the fit, we should set alpha = 1.
 ```{r}
 FIT.6 <- Gland_fin_tsibble %>%
-model(ETS(Ebike_Grand_Rue ~ error("A") + trend("N", alpha=1) + season("N")))
+model(ETS(Ebike_Grand_Rue ~ error("A") + trend("N", alpha=1) + season("A")))
 FIT.6 %>% forecast(h = 144) %>% autoplot(Gland_fin_tsibble) +
 theme(legend.position = "none")
 FIT.6%>%accuracy()
@@ -1115,14 +1099,14 @@ components(dcmp) %>% autoplot() + xlab("Date")
 ```{r}
 #ETS forecast
 fit7 <- Gland_fin_tsibble %>%
-model(ETS(Bike_La_Falaise ~ error("A") + trend("N") + season("N"), opt_crit = "mse"))
+model(ETS(Bike_La_Falaise ~ error("A") + trend("N") + season("A"), opt_crit = "mse"))
 coefficients(fit7)
 ```
 
 According to the fit, we should set alpha = 0.91.
 ```{r}
 FIT7 <- Gland_fin_tsibble %>%
-model(ETS(Bike_La_Falaise ~ error("A") + trend("N", alpha=0.91) + season("N")))
+model(ETS(Bike_La_Falaise ~ error("A") + trend("N", alpha=0.91) + season("A")))
 FIT7 %>% forecast(h = 144) %>% autoplot(Gland_fin_tsibble) +
 theme(legend.position = "none")
 FIT7%>%accuracy()
@@ -1150,14 +1134,14 @@ components(dcmp) %>% autoplot() + xlab("Date")
 ```{r}
 #ETS forecast
 fit.7 <- Gland_fin_tsibble %>%
-model(ETS(Ebike_La_Falaise ~ error("A") + trend("N") + season("N"), opt_crit = "mse"))
+model(ETS(Ebike_La_Falaise ~ error("A") + trend("N") + season("A"), opt_crit = "mse"))
 coefficients(fit.7)
 ```
 
 According to the fit, we should set alpha = 0.98.
 ```{r}
 FIT.7 <- Gland_fin_tsibble %>%
-model(ETS(Ebike_La_Falaise ~ error("A") + trend("N", alpha=0.98) + season("N")))
+model(ETS(Ebike_La_Falaise ~ error("A") + trend("N", alpha=0.98) + season("A")))
 FIT.7 %>% forecast(h = 144) %>% autoplot(Gland_fin_tsibble) +
 theme(legend.position = "none")
 FIT.7%>%accuracy()
@@ -1288,14 +1272,14 @@ components(dcmp) %>% autoplot() + xlab("Date")
 ```{r}
 #ETS forecast
 fit8 <- Gland_fin_tsibble %>%
-model(ETS(Bike_La_Lignière ~ error("A") + trend("N") + season("N"), opt_crit = "mse"))
+model(ETS(Bike_La_Lignière ~ error("A") + trend("N") + season("A"), opt_crit = "mse"))
 coefficients(fit8)
 ```
 
 According to the fit, we should set alpha = 0.94.
 ```{r}
 FIT8 <- Gland_fin_tsibble %>%
-model(ETS(Bike_La_Lignière ~ error("A") + trend("N", alpha=0.94) + season("N")))
+model(ETS(Bike_La_Lignière ~ error("A") + trend("N", alpha=0.94) + season("A")))
 FIT8 %>% forecast(h = 144) %>% autoplot(Gland_fin_tsibble) +
 theme(legend.position = "none")
 FIT8%>%accuracy()
@@ -1323,14 +1307,14 @@ components(dcmp) %>% autoplot() + xlab("Date")
 ```{r}
 #ETS forecast
 fit.8 <- Gland_fin_tsibble %>%
-model(ETS(Ebike_La_Lignière ~ error("A") + trend("N") + season("N"), opt_crit = "mse"))
+model(ETS(Ebike_La_Lignière ~ error("A") + trend("N") + season("A"), opt_crit = "mse"))
 coefficients(fit.8)
 ```
 
 According to the fit, we should set alpha = 0.96.
 ```{r}
 FIT.8 <- Gland_fin_tsibble %>%
-model(ETS(Ebike_La_Lignière ~ error("A") + trend("N", alpha=0.96) + season("N")))
+model(ETS(Ebike_La_Lignière ~ error("A") + trend("N", alpha=0.96) + season("A")))
 FIT.8 %>% forecast(h = 144) %>% autoplot(Gland_fin_tsibble) +
 theme(legend.position = "none")
 FIT.8%>%accuracy()
@@ -1461,14 +1445,14 @@ components(dcmp) %>% autoplot() + xlab("Date")
 ```{r}
 #ETS forecast
 fit9 <- Gland_fin_tsibble %>%
-model(ETS(Bike_Eikenott ~ error("A") + trend("N") + season("N"), opt_crit = "mse"))
+model(ETS(Bike_Eikenott ~ error("A") + trend("N") + season("A"), opt_crit = "mse"))
 coefficients(fit9)
 ```
 
 According to the fit, we should set alpha = 0.99.
 ```{r}
 FIT9 <- Gland_fin_tsibble %>%
-model(ETS(Bike_Eikenott ~ error("A") + trend("N", alpha=0.99) + season("N")))
+model(ETS(Bike_Eikenott ~ error("A") + trend("N", alpha=0.99) + season("A")))
 FIT9 %>% forecast(h = 144) %>% autoplot(Gland_fin_tsibble) +
 theme(legend.position = "none")
 FIT9%>%accuracy()
@@ -1496,14 +1480,14 @@ components(dcmp) %>% autoplot() + xlab("Date")
 ```{r}
 #ETS forecast
 fit.9 <- Gland_fin_tsibble %>%
-model(ETS(Ebike_Eikenott ~ error("A") + trend("N") + season("N"), opt_crit = "mse"))
+model(ETS(Ebike_Eikenott ~ error("A") + trend("N") + season("A"), opt_crit = "mse"))
 coefficients(fit.9)
 ```
 
 According to the fit, we should set alpha = 0.95.
 ```{r}
 FIT.9 <- Gland_fin_tsibble %>%
-model(ETS(Ebike_Eikenott ~ error("A") + trend("N", alpha=0.95) + season("N")))
+model(ETS(Ebike_Eikenott ~ error("A") + trend("N", alpha=0.95) + season("A")))
 FIT.9 %>% forecast(h = 144) %>% autoplot(Gland_fin_tsibble) +
 theme(legend.position = "none")
 FIT.9%>%accuracy()
@@ -1634,14 +1618,14 @@ components(dcmp) %>% autoplot() + xlab("Date")
 ```{r}
 #ETS forecast
 fit10 <- Gland_fin_tsibble %>%
-model(ETS(Bike_La_Dôle ~ error("A") + trend("N") + season("N"), opt_crit = "mse"))
+model(ETS(Bike_La_Dôle ~ error("A") + trend("N") + season("A"), opt_crit = "mse"))
 coefficients(fit10)
 ```
 
 According to the fit, we should set alpha = 0.99.
 ```{r}
 FIT10 <- Gland_fin_tsibble %>%
-model(ETS(Bike_La_Dôle ~ error("A") + trend("N", alpha=0.99) + season("N")))
+model(ETS(Bike_La_Dôle ~ error("A") + trend("N", alpha=0.99) + season("A")))
 FIT10 %>% forecast(h = 144) %>% autoplot(Gland_fin_tsibble) +
 theme(legend.position = "none")
 FIT10%>%accuracy()
@@ -1669,14 +1653,14 @@ components(dcmp) %>% autoplot() + xlab("Date")
 ```{r}
 #ETS forecast
 fit.10 <- Gland_fin_tsibble %>%
-model(ETS(Ebike_La_Dôle ~ error("A") + trend("N") + season("N"), opt_crit = "mse"))
+model(ETS(Ebike_La_Dôle ~ error("A") + trend("N") + season("A"), opt_crit = "mse"))
 coefficients(fit.10)
 ```
 
 According to the fit, we should set alpha = 1.
 ```{r}
 FIT.10 <- Gland_fin_tsibble %>%
-model(ETS(Ebike_La_Dôle ~ error("A") + trend("N", alpha=1) + season("N")))
+model(ETS(Ebike_La_Dôle ~ error("A") + trend("N", alpha=1) + season("A")))
 FIT.10 %>% forecast(h = 144) %>% autoplot(Gland_fin_tsibble) +
 theme(legend.position = "none")
 FIT.10%>%accuracy()
@@ -1807,14 +1791,14 @@ components(dcmp) %>% autoplot() + xlab("Date")
 ```{r}
 #ETS forecast
 fit11 <- Gland_fin_tsibble %>%
-model(ETS(Bike_En_Bord ~ error("A") + trend("N") + season("N"), opt_crit = "mse"))
+model(ETS(Bike_En_Bord ~ error("A") + trend("N") + season("A"), opt_crit = "mse"))
 coefficients(fit11)
 ```
 
 According to the fit, we should set alpha = 0.95.
 ```{r}
 FIT11 <- Gland_fin_tsibble %>%
-model(ETS(Bike_En_Bord ~ error("A") + trend("N", alpha=0.95) + season("N")))
+model(ETS(Bike_En_Bord ~ error("A") + trend("N", alpha=0.95) + season("A")))
 FIT11 %>% forecast(h = 144) %>% autoplot(Gland_fin_tsibble) +
 theme(legend.position = "none")
 FIT11%>%accuracy()
@@ -1842,14 +1826,14 @@ components(dcmp) %>% autoplot() + xlab("Date")
 ```{r}
 #ETS forecast
 fit.11 <- Gland_fin_tsibble %>%
-model(ETS(Ebike_En_Bord ~ error("A") + trend("N") + season("N"), opt_crit = "mse"))
+model(ETS(Ebike_En_Bord ~ error("A") + trend("N") + season("A"), opt_crit = "mse"))
 coefficients(fit.11)
 ```
 
 According to the fit, we should set alpha = 93.
 ```{r}
 FIT.11 <- Gland_fin_tsibble %>%
-model(ETS(Ebike_En_Bord ~ error("A") + trend("N", alpha=0.93) + season("N")))
+model(ETS(Ebike_En_Bord ~ error("A") + trend("N", alpha=0.93) + season("A")))
 FIT.11 %>% forecast(h = 144) %>% autoplot(Gland_fin_tsibble) +
 theme(legend.position = "none")
 FIT.11%>%accuracy()
