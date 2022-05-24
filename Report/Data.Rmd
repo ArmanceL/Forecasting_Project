@@ -453,35 +453,8 @@ Gland_fin$press <- as.numeric(Gland_fin$press)
 head(Gland_fin)
 ```
 
-To plot different variable in the same graph they need to be comparble
-```{r}
-#search for a max Bike and EBike value for every station
-max(Gland_fin[ , c(2,3,5,6,8,9,11,12,14,15,17,18,20,21,23,24,26,27,29,30,32,33)], na.rm = TRUE)
-#The max number of bycicle in a station is 12, so we will scale the weather variables from 0 to 12
-```
-Scaling process
-```{r}
-#internal variance
-diff_prec <- max(Gland_fin$prec, na.rm = TRUE) - min(Gland_fin$prec, na.rm = TRUE)
-diff_temp <- max(Gland_fin$temp, na.rm = TRUE) - min(Gland_fin$temp, na.rm = TRUE)
-diff_ensoll <- max(Gland_fin$ensoll, na.rm = TRUE) - min(Gland_fin$ensoll, na.rm = TRUE)
-diff_vent <- max(Gland_fin$vent, na.rm = TRUE) - min(Gland_fin$vent, na.rm = TRUE)
-diff_press <- max(Gland_fin$press, na.rm = TRUE) - min(Gland_fin$press, na.rm = TRUE)
-#minimum
-min_prec <- min(Gland_fin$prec, na.rm = TRUE)
-min_temp <- min(Gland_fin$temp, na.rm = TRUE)
-min_ensoll <- min(Gland_fin$ensoll, na.rm = TRUE)
-min_vent <- min(Gland_fin$vent, na.rm = TRUE)
-min_press <- min(Gland_fin$press, na.rm = TRUE)
-#final formula to obtain datas from 0 to 12
-Gland_fin$prec_comp <- (Gland_fin$prec - min_prec)*12/diff_prec
-Gland_fin$temp_comp <- (Gland_fin$temp - min_temp)*12/diff_temp
-Gland_fin$ensoll_comp <- (Gland_fin$ensoll - min_ensoll)*12/diff_ensoll
-Gland_fin$vent_comp <- (Gland_fin$vent - min_vent)*12/diff_vent
-Gland_fin$press_comp <- (Gland_fin$press - min_press)*12/diff_press
-```
 
-The dataset is now ready to be used. 
+The first dataset is now ready to be used. 
 
 
 
