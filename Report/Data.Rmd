@@ -457,20 +457,128 @@ head(Gland_fin)
 The first dataset is now ready to be used. 
 
 
+#### PART 2 -> NEW DATA
 
-The city of Gland has 11 stations and each of them has either classic bikes or electric bikes (e-bike). This includes 1858 observations and 2 variables for each station and each type of bike.
-**Stations**:
-1. Gland_Les_Tuillières 
-2. Gland_Swissquote 
-3. Gland_Gare_Sud
-4. Gland_UICN 
-5. Gland_Montoly 
-6. Gland_Grande_Rue 
-7. Gland_La_Falaise 
-8. Gland_La_Lignère 
-9. Gland_Eikenott 
-10. Gland_La_Dôle 
-11. Gland_En_Bord 
-**Variables**
-1. Date : *date* Borrowing date of the bike
-2. Bike : *num* Number of the borrowed bike 
+Building the dataset for every Gland station
+
+```{r}
+
+Gland_Les_Tuillières_fin <- series$`Gland, Les Tuillières` #select the station name from the series and converting into a data frame 
+colnames(Gland_Les_Tuillières_fin) <- c("Bike","E_Bike","Capacity","Date","Name","ID") #setting the column names
+
+#repet for every station
+
+Gland_Swissquote_fin <- series$`Gland, Swissquote`
+colnames(Gland_Swissquote_fin) <- c("Bike","E_Bike","Capacity","Date","Name","ID")
+
+Gland_Gare_Sud_fin <- series$`Gland, Gare Sud, travaux, déplacée de 20m en mars-avril`
+colnames(Gland_Gare_Sud_fin) <- c("Bike","E_Bike","Capacity","Date","Name","ID")
+
+Gland_UICN_fin <- series$`Gland, UICN`
+colnames(Gland_UICN_fin) <- c("Bike","E_Bike","Capacity","Date","Name","ID")
+
+Gland_Montoly_fin <- series$`Gland, Montoly`
+colnames(Gland_Montoly_fin) <- c("Bike","E_Bike","Capacity","Date","Name","ID")
+
+Gland_Grand_Rue_fin <- series$`Gland, Grand'Rue`
+colnames(Gland_Grand_Rue_fin) <- c("Bike","E_Bike","Capacity","Date","Name","ID")
+
+Gland_La_Falaise_fin <- series$`Gland, La Falaise`
+colnames(Gland_La_Falaise_fin) <- c("Bike","E_Bike","Capacity","Date","Name","ID")
+
+Gland_La_Lignière_fin <- series$`Gland, La Lignière`
+colnames(Gland_La_Lignière_fin) <- c("Bike","E_Bike","Capacity","Date","Name","ID")
+
+Gland_Eikenott_fin <- series$`Gland, Eikenott`
+colnames(Gland_Eikenott_fin) <- c("Bike","E_Bike","Capacity","Date","Name","ID")
+
+Gland_La_Dôle_fin <- series$`Gland, La Dôle`
+colnames(Gland_La_Dôle_fin) <- c("Bike","E_Bike","Capacity","Date","Name","ID")
+
+Gland_En_Bord_fin <- series$`Gland, En Bord`
+colnames(Gland_En_Bord_fin) <- c("Bike","E_Bike","Capacity","Date","Name","ID")
+
+```
+
+#The first 117 observations are 1 per our and not every 10 minuts -> eliminate
+```{r}
+#discover the tot number of observation per station (every station has the same size, just one is needed) 
+nobs2 <- nrow(Gland_Eikenott_fin)
+
+Gland_Eikenott_fin <- Gland_Eikenott_fin[c(118:nobs2), ] #selecting only the observation with the right temporal mesure
+row.names(Gland_Eikenott_fin) <- NULL #reset the index
+Gland_Eikenott_fin$Name <- NULL #eliminate the column name
+Gland_Eikenott_fin$ID <- NULL #eliminate the column ID
+
+#repet for every station
+
+Gland_En_Bord_fin <- Gland_En_Bord_fin[c(118:nobs2), ]
+row.names(Gland_En_Bord_fin) <- NULL
+Gland_En_Bord_fin$Name <- NULL
+Gland_En_Bord_fin$ID <- NULL
+
+Gland_Gare_Sud_fin <- Gland_Gare_Sud_fin[c(118:nobs2), ]
+row.names(Gland_Gare_Sud_fin) <- NULL
+Gland_Gare_Sud_fin$Name <- NULL
+Gland_Gare_Sud_fin$ID <- NULL
+
+Gland_Grand_Rue_fin <- Gland_Grand_Rue_fin[c(118:nobs2), ]
+row.names(Gland_Grand_Rue_fin) <- NULL
+Gland_Grand_Rue_fin$Name <- NULL
+Gland_Grand_Rue_fin$ID <- NULL
+
+Gland_La_Dôle_fin <- Gland_La_Dôle_fin[c(118:nobs2), ]
+row.names(Gland_La_Dôle_fin) <- NULL
+Gland_La_Dôle_fin$Name <- NULL
+Gland_La_Dôle_fin$ID <- NULL
+
+Gland_La_Falaise_fin <- Gland_La_Falaise_fin[c(118:nobs2), ]
+row.names(Gland_La_Falaise_fin) <- NULL
+Gland_La_Falaise_fin$Name <- NULL
+Gland_La_Falaise_fin$ID <- NULL
+
+Gland_Les_Tuillières_fin <- Gland_Les_Tuillières_fin[c(118:nobs2), ]
+row.names(Gland_Les_Tuillières_fin) <- NULL
+Gland_Les_Tuillières_fin$Name <- NULL
+Gland_Les_Tuillières_fin$ID <- NULL
+
+Gland_Montoly_fin <- Gland_Montoly_fin[c(118:nobs2), ]
+row.names(Gland_Montoly_fin) <- NULL
+Gland_Montoly_fin$Name <- NULL
+Gland_Montoly_fin$ID <- NULL
+
+Gland_Swissquote_fin <- Gland_Swissquote_fin[c(118:nobs2), ]
+row.names(Gland_Swissquote_fin) <- NULL
+Gland_Swissquote_fin$Name <- NULL
+Gland_Swissquote_fin$ID <- NULL
+
+Gland_UICN_fin <- Gland_UICN_fin[c(118:nobs2), ]
+row.names(Gland_UICN_fin) <- NULL
+Gland_UICN_fin$Name <- NULL
+Gland_UICN_fin$ID <- NULL
+
+Gland_La_Lignière_fin <- Gland_La_Lignière_fin[c(118:nobs2), ]
+row.names(Gland_La_Lignière_fin) <- NULL
+Gland_La_Lignière_fin$Name <- NULL
+Gland_La_Lignière_fin$ID <- NULL
+
+```
+
+```{r}
+Gland_tot_clean_fin <- bind_cols(Gland_Eikenott_fin, Gland_En_Bord_fin, Gland_Gare_Sud_fin, Gland_Grand_Rue_fin, Gland_La_Dôle_fin, Gland_La_Falaise_fin, Gland_La_Lignière_fin, Gland_Les_Tuillières_fin, Gland_Montoly_fin, Gland_Swissquote_fin, Gland_UICN_fin) #bind every data frame needed
+Gland_fin_2 <- Gland_tot_clean_fin[-c(8,12,16,20,24,28,32,36,40,44)]
+Gland_fin_2 <- Gland_fin_2[ , c(4,1:3,5:34)]
+```
+
+```{r}
+colnames(Gland_fin_2) <- c("Date","Bike_Eikenott", "Ebike_Eikenott", "Capacity_Eikenott", "Bike_En_Bord", "Ebike_En_Bord", "Capacity_En_Bord", "Bike_Gare_Sud", "Ebike_Gare_Sud", "Capacity_Gare_Sud", "Bike_Grand_Rue", "Ebike_Grand_Rue", "Capacity_Grand_Rue", "Bike_La_Dôle", "Ebike_La_Dôle", "Capacity_La_Dôle", "Bike_La_Falaise", "Ebike_La_Falaise", "Capacity_La_Falaise", "Bike_La_Lignière", "Ebike_La_Lignière", "Capacity_La_Lignière", "Bike_Les_Tuillières", "Ebike_Les_Tuillières", "Capacity_Les_Tuillières", "Bike_Montoly", "Ebike_Montoly", "Capacity_Montoly", "Bike_Swissquote", "Ebike_Swissquote", "Capacity_Swissquote", "Bike_UICN", "Ebike_UICN", "Capacity_UICN")
+```
+
+```{r}
+
+Gland_fin_2 <- Gland_fin_2 %>% pad()
+
+```
+
+
+The second bike dataset of the most updated data is ready to be used. 
